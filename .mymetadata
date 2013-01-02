@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-module
   type="WEB"
-  name="synearlpf"
+  name="lpf"
   id="myeclipse.1357094278000"
-  context-root="/synearlpf"
+  context-root="/lpf"
   j2ee-spec="5.0"
-  archive="synearlpf.war">
+  archive="lpf.war">
   <attributes>
     <attribute name="webrootdir" value="WebRoot" />
   </attributes>

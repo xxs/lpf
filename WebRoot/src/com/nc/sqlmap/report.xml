@@ -1,0 +1,1575 @@
+<?xml version="1.0" encoding="gb2312"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+	"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="report">
+
+	<select id="getfactroy" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select pk_ucode pk_deptdoc,uname deptname from tunit where utype=1
+	</select>
+
+	<select id="getstock" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select pk_scode pk_STORDOC,sname STORNAME,pk_ucode pk_fathercode from tstock
+	</select>
+
+	<select id="gethaveNum" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+select p.invname,p.invtype,p.unitweight,p.invcode,sum(qznum) qznum,sum(qznum*p.unitweight) qznum2,sum(incount) incount,sum(incount*p.unitweight) incount2
+,sum(outcount) outcount,sum(outcount*p.unitweight) outcount2,sum(diff) diff, sum(qznum+incount+diff-outcount) bqnum,sum((qznum+incount+diff-outcount)*p.unitweight) bqnum2   from (
+select trim(b.INVCODE) invcode 
+,decode(trim(h.cdispatcherid),'111',b.incount,'102',b.incount,'001',b.incount,'999',b.incount,'108',b.incount,0) qznum
+,0 incount , 0 outcount ,h.hindate,h.cwarehouseid,0 diff
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE
+and h.hindate &lt;#form_begintime#
+union all 
+  
+select substr(b.vbatchcode,0,6) invcode
+,-decode(trim(h.cdispatcherid),'235',b.outcount,'888',b.outcount,'210',b.outcount,0) qznum
+,0 incount , 0 outcount ,h.houtdate,h.OUTSTO,0 diff
+from outstorebill_h h,outstorebill_b b
+where h.cbillcode= b.cbillcode 
+and h.houtdate &lt;#form_begintime#
+
+union all 
+select b.invcode,- b.diffcount as qznum,0 incount , 0 outcount, h.makedate,h.cwarehouseid,0 diff
+from daystock_h h,daystock_b b where  b.billid=h.billid and h.makedate &lt;=#form_endtime#
+union all
+
+select trim(b.INVCODE) invcode ,0 qznum
+,decode(trim(h.cdispatcherid),'111',b.incount,'102',b.incount,'999',b.incount,'108',b.incount,0) incount , 0 outcount ,h.hindate,h.cwarehouseid,0 diff
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE
+ <dynamic>
+		       <isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							h.hindate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+					
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							h.hindate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+ </dynamic>
+union all
+select substr(b.vbatchcode,0,6) invcode
+, 0 qznum
+,-decode(trim(h.cdispatcherid),'888',b.outcount,0) incount , 0 outcount ,h.houtdate,h.OUTSTO,0 diff
+from outstorebill_h h,outstorebill_b b
+where h.cbillcode= b.cbillcode 
+ <dynamic>
+		       <isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							h.houtdate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+					
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							h.houtdate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+ </dynamic>
+union all
+
+select trim(b.INVCODE) invcode ,0 qznum
+,0 incount , -decode(trim(h.cdispatcherid),'001',b.incount,0) outcount ,h.hindate,h.cwarehouseid,0 diff
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE
+ <dynamic>
+		       <isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							h.hindate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+					
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							h.hindate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+ </dynamic>
+union all
+select substr(b.vbatchcode,0,6) invcode
+, 0 qznum
+,0 incount , decode(trim(h.cdispatcherid),'235',b.outcount,'210',b.outcount,0) outcount ,h.houtdate,h.OUTSTO,0 diff
+from outstorebill_h h,outstorebill_b b
+where h.cbillcode = b.cbillcode
+ <dynamic>
+		       <isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							h.houtdate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+					
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							h.houtdate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+ </dynamic>
+
+union all 
+select b.invcode,0 as qznum,0 incount , 0 outcount, h.makedate,h.cwarehouseid,b.diffcount
+from daystock_h h,daystock_b b where  b.billid=h.billid 
+ <dynamic>
+		       <isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							h.makedate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+					
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							h.makedate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+ </dynamic>
+
+) s,bd_invbasdoc p,tstock st where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode  
+
+ <dynamic>
+        <isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+		</isNotEmpty>
+		<isNotEmpty property="form_storname" prepend="AND">
+					trim(s.cwarehouseid)=#form_storname#
+		</isNotEmpty>
+		<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+		</isNotEmpty>
+	</dynamic>
+ group by p.invname,p.invtype,p.unitweight,p.invcode
+
+	</select>
+
+	<select id="getPnum" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select invname,invtype,unitweight,invcode,sum(incount) incount,sum(incount2) incount2 ,sum(outcount) outcount,sum(outcount2) outcount2 from(
+      select p.invname,p.invtype,p.unitweight,p.invcode,sum(s.incount) incount,sum(s.incount*p.unitweight) incount2,sum(s.outcount) outcount,sum(s.outcount*p.unitweight) outcount2,indate from
+       (select h.cwarehouseid,b.vbatchcode,b.invcode,b.incount,0 outcount,h.hindate indate from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode
+           union all
+        select h.outsto,b.vbatchcode,substr(b.vbatchcode,0,6),0,b.outcount,h.houtdate from outstorebill_h h,outstorebill_b b where h.cbillcode=b.cbillcode
+       )
+        s,bd_invbasdoc p,tstock st where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode
+       
+			<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							indate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_storname" prepend="AND">
+					st.pk_scode=#form_storname#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+         group by p.invname,p.invtype,p.unitweight,p.invcode,indate
+		 )    
+		 <dynamic>
+		 <isNotEmpty property="form_endtime" prepend="where">
+		 indate = #form_endtime#
+	   </isNotEmpty>
+	  </dynamic> 
+		 group by invname,invtype,unitweight,invcode
+	</select>
+
+	<select id="getclassTree" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+        select s.invclasscode,s.pk_invcl code,t.pk_invcl pcode,s.invclassname from nc.bd_invcl t,nc.bd_invcl s where (substr(t.invclasscode,0,2)='03' or substr(t.invclasscode,0,2)='09') and t.invclasscode=substr(s.invclasscode,0,length(s.invclasscode)-2) order by s.invclasscode
+	</select>
+
+	<select id="selectProd" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+			   SELECT NCINVCODE,INVCODE,INVNAME,INVTYPE,UNIT,UNITWEIGHT,SPEC FROM BD_INVBASDOC where 'a'='a'
+			<dynamic>
+				<isNotEmpty property="form_pname" prepend="AND">
+					INVNAME like '%$form_pname$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					NCINVCODE like '$form_ptype$%'
+				</isNotEmpty>
+			</dynamic>
+			order by NCINVCODE) A ) B where B.ROWNO between #START# and #END#
+	</select>
+
+	<select id="selectProdById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			   SELECT NCINVCODE,INVCODE,INVNAME,INVTYPE,UNIT,UNITWEIGHT,SPEC FROM BD_INVBASDOC where NCINVCODE = #form_PID#
+	</select>
+
+	<select id="testProd" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			   SELECT NCINVCODE,INVCODE,INVNAME,INVTYPE,UNIT,UNITWEIGHT FROM BD_INVBASDOC where INVCODE = #form_pcode#
+	</select>
+
+	<update id="updateProd" parameterClass="java.util.Map">
+		update BD_INVBASDOC set INVCODE=#form_pcode#,INVNAME=#form_pname#,INVTYPE=#form_ptype#,UNIT=#form_punit#,UNITWEIGHT=#form_unitweight#,SPEC=#form_pspec# where NCINVCODE=#form_nccode#
+	</update>
+
+	<select id="selectProdNc" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+               SELECT T.SEALFLAG,T.INVCODE,T.INVNAME,T.INVSPEC,J.MEASNAME,SUBSTR(T.INVCODE,0,LENGTH(T.INVCODE)-3) PK_INVCL FROM BD_INVBASDOC_NC T,BD_MEASDOC_NC J 
+               WHERE T.PK_MEASDOC=J.PK_MEASDOC AND (SUBSTR(T.INVCODE,0,2)='03' or SUBSTR(T.INVCODE,0,2)='09')
+               AND INVCODE NOT IN(SELECT NCINVCODE FROM BD_INVBASDOC) 
+			<dynamic>
+				<isNotEmpty property="form_pname" prepend="AND">
+					T.INVNAME like '%$form_pname$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					T.INVCODE like '$form_ptype$%'
+				</isNotEmpty>
+			</dynamic>
+			order by T.INVCODE) A ) B where B.ROWNO between #START# and #END#
+	</select>
+
+	<insert id="addprod" parameterClass="java.util.Map">
+		insert into bd_invbasdoc (ncinvcode,invcode,pk_invcl,invname,invtype,unit,unitweight,spec)
+		values (#form_nccode#, #form_pcode#, #form_pinvcl#,#form_pname#, #form_ptype#, #form_punit#,#form_unitweight#,#form_pspec#)
+	</insert>
+
+	<delete id="dropprod" parameterClass="java.util.Map">
+			delete bd_invbasdoc where NCINVCODE = #form_PID#
+	</delete>
+
+	<select id="getMonthReport" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+       select cl.invclassname,p.spec,p.invname,P.INVTYPE,P.unitweight,sum(D1*p.unitweight) D1,sum(D2*p.unitweight) D2,sum(D3*p.unitweight) D3,sum(D4*p.unitweight) D4,
+        sum(D5*p.unitweight) D5,sum(D6*p.unitweight) D6,sum(D7*p.unitweight) D7
+        ,sum(D8*p.unitweight) D8,sum(D9*p.unitweight) D9,sum(D10*p.unitweight) D10,sum(D11*p.unitweight) D11,sum(D12*p.unitweight) D12,
+         sum(D13*p.unitweight) D13,sum(D14*p.unitweight) D14,sum(D15*p.unitweight) D15,sum(D16*p.unitweight) D16
+        ,sum(D17*p.unitweight) D17,sum(D18*p.unitweight) D18,sum(D19*p.unitweight) D19,sum(D20*p.unitweight) D20,sum(D21*p.unitweight) D21,
+         sum(D22*p.unitweight) D22,sum(D23*p.unitweight) D23,sum(D24*p.unitweight) D24,sum(D25*p.unitweight) D25
+        ,sum(D26*p.unitweight) D26,sum(D27*p.unitweight) D27,sum(D28*p.unitweight) D28,sum(D29*p.unitweight) D29,sum(D30*p.unitweight) D30,
+        sum(D31*p.unitweight) D31,sum(incount*p.unitweight) snum
+         from (
+         select b.invcode,('20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate
+        ,case substr(b.vbatchcode,11,2) when '01' then incount else 0 end d1 
+        ,case substr(b.vbatchcode,11,2) when '02' then incount else 0 end d2
+        ,case substr(b.vbatchcode,11,2) when '03' then incount else 0 end d3
+        ,case substr(b.vbatchcode,11,2) when '04' then incount else 0 end d4
+        ,case substr(b.vbatchcode,11,2) when '05' then incount else 0 end d5
+        ,case substr(b.vbatchcode,11,2) when '06' then incount else 0 end d6
+        ,case substr(b.vbatchcode,11,2) when '07' then incount else 0 end d7
+        ,case substr(b.vbatchcode,11,2) when '08' then incount else 0 end d8
+        ,case substr(b.vbatchcode,11,2) when '09' then incount else 0 end d9
+        ,case substr(b.vbatchcode,11,2) when '10' then incount else 0 end d10
+        ,case substr(b.vbatchcode,11,2) when '11' then incount else 0 end d11
+        ,case substr(b.vbatchcode,11,2) when '12' then incount else 0 end d12
+        ,case substr(b.vbatchcode,11,2) when '13' then incount else 0 end d13
+        ,case substr(b.vbatchcode,11,2) when '14' then incount else 0 end d14
+        ,case substr(b.vbatchcode,11,2) when '15' then incount else 0 end d15
+        ,case substr(b.vbatchcode,11,2) when '16' then incount else 0 end d16
+        ,case substr(b.vbatchcode,11,2) when '17' then incount else 0 end d17
+        ,case substr(b.vbatchcode,11,2) when '18' then incount else 0 end d18
+        ,case substr(b.vbatchcode,11,2) when '19' then incount else 0 end d19
+        ,case substr(b.vbatchcode,11,2) when '20' then incount else 0 end d20
+        ,case substr(b.vbatchcode,11,2) when '21' then incount else 0 end d21
+        ,case substr(b.vbatchcode,11,2) when '22' then incount else 0 end d22
+        ,case substr(b.vbatchcode,11,2) when '23' then incount else 0 end d23
+        ,case substr(b.vbatchcode,11,2) when '24' then incount else 0 end d24
+        ,case substr(b.vbatchcode,11,2) when '25' then incount else 0 end d25
+        ,case substr(b.vbatchcode,11,2) when '26' then incount else 0 end d26
+        ,case substr(b.vbatchcode,11,2) when '27' then incount else 0 end d27
+        ,case substr(b.vbatchcode,11,2) when '28' then incount else 0 end d28
+        ,case substr(b.vbatchcode,11,2) when '29' then incount else 0 end d29
+        ,case substr(b.vbatchcode,11,2) when '30' then incount else 0 end d30
+        ,case substr(b.vbatchcode,11,2) when '31' then incount else 0 end d31
+        ,b.incount,h.cwarehouseid,h.cdispatcherid,h.team
+        from ic_general_b b,ic_general_h h where b.vbillcode=h.vbillcode and h.cdispatcherid='102'
+        union all
+        select b.invcode,('20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate
+        ,case substr(b.vbatchcode,11,2) when '01' then -incount else 0 end d1 
+        ,case substr(b.vbatchcode,11,2) when '02' then -incount else 0 end d2
+        ,case substr(b.vbatchcode,11,2) when '03' then -incount else 0 end d3
+        ,case substr(b.vbatchcode,11,2) when '04' then -incount else 0 end d4
+        ,case substr(b.vbatchcode,11,2) when '05' then -incount else 0 end d5
+        ,case substr(b.vbatchcode,11,2) when '06' then -incount else 0 end d6
+        ,case substr(b.vbatchcode,11,2) when '07' then -incount else 0 end d7
+        ,case substr(b.vbatchcode,11,2) when '08' then -incount else 0 end d8
+        ,case substr(b.vbatchcode,11,2) when '09' then -incount else 0 end d9
+        ,case substr(b.vbatchcode,11,2) when '10' then -incount else 0 end d10
+        ,case substr(b.vbatchcode,11,2) when '11' then -incount else 0 end d11
+        ,case substr(b.vbatchcode,11,2) when '12' then -incount else 0 end d12
+        ,case substr(b.vbatchcode,11,2) when '13' then -incount else 0 end d13
+        ,case substr(b.vbatchcode,11,2) when '14' then -incount else 0 end d14
+        ,case substr(b.vbatchcode,11,2) when '15' then -incount else 0 end d15
+        ,case substr(b.vbatchcode,11,2) when '16' then -incount else 0 end d16
+        ,case substr(b.vbatchcode,11,2) when '17' then -incount else 0 end d17
+        ,case substr(b.vbatchcode,11,2) when '18' then -incount else 0 end d18
+        ,case substr(b.vbatchcode,11,2) when '19' then -incount else 0 end d19
+        ,case substr(b.vbatchcode,11,2) when '20' then -incount else 0 end d20
+        ,case substr(b.vbatchcode,11,2) when '21' then -incount else 0 end d21
+        ,case substr(b.vbatchcode,11,2) when '22' then -incount else 0 end d22
+        ,case substr(b.vbatchcode,11,2) when '23' then -incount else 0 end d23
+        ,case substr(b.vbatchcode,11,2) when '24' then -incount else 0 end d24
+        ,case substr(b.vbatchcode,11,2) when '25' then -incount else 0 end d25
+        ,case substr(b.vbatchcode,11,2) when '26' then -incount else 0 end d26
+        ,case substr(b.vbatchcode,11,2) when '27' then -incount else 0 end d27
+        ,case substr(b.vbatchcode,11,2) when '28' then -incount else 0 end d28
+        ,case substr(b.vbatchcode,11,2) when '29' then -incount else 0 end d29
+        ,case substr(b.vbatchcode,11,2) when '30' then -incount else 0 end d30
+        ,case substr(b.vbatchcode,11,2) when '31' then -incount else 0 end d31
+        ,-b.incount,h.cwarehouseid,h.cdispatcherid,h.team
+        from ic_general_b b,ic_general_h h where b.vbillcode=h.vbillcode and h.cdispatcherid='001'
+                 union all
+        select substr(ob.vbatchcode,0,6),substr(oh.houtdate,0,10)
+        ,decode(substr(ob.vbatchcode,11,2),'01',-ob.outcount, 0) d1 
+        ,decode(substr(ob.vbatchcode,11,2),'02',-ob.outcount, 0) d2 
+        ,decode(substr(ob.vbatchcode,11,2),'03',-ob.outcount, 0) d3 
+        ,decode(substr(ob.vbatchcode,11,2),'04',-ob.outcount, 0) d4 
+        ,decode(substr(ob.vbatchcode,11,2),'05',-ob.outcount, 0) d5 
+        ,decode(substr(ob.vbatchcode,11,2),'06',-ob.outcount, 0) d6 
+        ,decode(substr(ob.vbatchcode,11,2),'07',-ob.outcount ,0) d7 
+        ,decode(substr(ob.vbatchcode,11,2),'08',-ob.outcount ,0) d8 
+        ,decode(substr(ob.vbatchcode,11,2),'09',-ob.outcount ,0) d9 
+        ,decode(substr(ob.vbatchcode,11,2),'10',-ob.outcount ,0) d10 
+              
+        ,decode(substr(ob.vbatchcode,11,2),'11',-ob.outcount ,0) d11 
+        ,decode(substr(ob.vbatchcode,11,2),'12',-ob.outcount, 0) d12 
+        ,decode(substr(ob.vbatchcode,11,2),'13',-ob.outcount ,0) d13 
+        ,decode(substr(ob.vbatchcode,11,2),'14',-ob.outcount, 0) d14 
+        ,decode(substr(ob.vbatchcode,11,2),'15',-ob.outcount, 0) d15 
+        ,decode(substr(ob.vbatchcode,11,2),'16',-ob.outcount, 0) d16 
+        ,decode(substr(ob.vbatchcode,11,2),'17',-ob.outcount, 0) d17 
+        ,decode(substr(ob.vbatchcode,11,2),'18',-ob.outcount, 0) d18 
+        ,decode(substr(ob.vbatchcode,11,2),'19',-ob.outcount, 0) d19 
+        ,decode(substr(ob.vbatchcode,11,2),'20',-ob.outcount, 0) d20 
+                        
+        ,decode(substr(ob.vbatchcode,11,2),'21',-ob.outcount, 0) d21 
+        ,decode(substr(ob.vbatchcode,11,2),'22',-ob.outcount, 0) d22 
+        ,decode(substr(ob.vbatchcode,11,2),'23',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'24',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'25',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'26',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'27',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'28',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'29',-ob.outcount, 0) d29 
+        ,decode(substr(ob.vbatchcode,11,2),'30',-ob.outcount, 0) d30 
+        ,decode(substr(ob.vbatchcode,11,2),'31',-ob.outcount, 0) d31 
+        ,-ob.outcount,oh.outsto,oh.cdispatcherid,oh.team
+        
+        from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='888'
+
+
+
+		) s,bd_invbasdoc p,tstock st,bd_invcl_nc cl 
+        where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode and substr(p.ncinvcode,0,4)=cl.invclasscode
+        	<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_mn" prepend="AND">
+					substr(s.indate,0,7) = #form_mn#
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					s.team=#form_stor#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+         group by (cl.invclassname,p.spec,p.invname,P.INVTYPE,P.unitweight)
+	</select>
+
+	<select id="selectOutbill" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+	   select distinct (REPLACE(h.houtdate,'-','')||b.carcode||b.carnum||h.team) billcode,tu.uname,h.operater,b.carcode,h.team,b.carnum,houtdate outdate
+			   from outstorebill_h h,outstorebill_b b,tstock st,tunit tu ,bd_invbasdoc p
+         where h.cbillcode=b.cbillcode and h.outsto=st.pk_scode and st.pk_ucode=tu.pk_ucode  and p.invcode = substr(b.VBATCHCODE,0,6)  
+			<dynamic>
+
+			    <isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+
+		    
+
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						houtdate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							houtdate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					h.operater=#form_stor#
+				</isNotEmpty>
+
+                <isNotEmpty property="form_carcode" prepend="AND">
+					b.carcode=#form_carcode#
+				</isNotEmpty>
+
+				<isNotEmpty property="form_team" prepend="AND">
+					h.team=#form_team#
+				</isNotEmpty>
+
+				<isNotEmpty property="form_carnum" prepend="AND">
+					b.carnum=#form_carnum#
+				</isNotEmpty>
+
+			</dynamic>
+			order by outdate desc ,h.team,b.carnum) A 
+			
+			) B where B.ROWNO between #START# and #END#
+	</select>
+	<select id="selectOutbill2" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select P.INVNAME,P.INVTYPE,P.UNIT,sum(T.OUTCOUNT) outcount from outstorebill_h h,outstorebill_b t,bd_invbasdoc p where substr(t.vbatchcode,0,6)=p.invcode and h.cbillcode=t.cbillcode
+		and (REPLACE(h.houtdate,'-','') ||t.carcode||t.carnum||h.team)= #form_PID#  group by P.INVNAME,P.INVTYPE,P.UNIT
+	</select>
+	<select id="selectOutbillp" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		  select P.INVNAME,s.vbatchcode,s.invcode,P.INVTYPE,P.UNIT,s.outcount from ( select t.vbatchcode,substr(t.vbatchcode,0,6) invcode,sum(T.OUTCOUNT) outcount from  outstorebill_h h,outstorebill_b t 
+          where  h.cbillcode=t.cbillcode  and (REPLACE(h.houtdate,'-','') ||t.carcode||t.carnum||h.team)= #form_PID# group by rollup(t.vbatchcode,substr(t.vbatchcode,0,6)))s left outer join bd_invbasdoc p on substr(s.vbatchcode,0,6)=p.invcode
+	</select>
+	<select id="selectOutbillById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			  select distinct (h.cbillcode || b.carnum||h.team) billcode,tu.uname,h.operater,b.carcode,substr(b.outdate,0,10) outdate,max(b.outdate) edate,min(b.outdate) sdate
+			   from outstorebill_h h,outstorebill_b b,tstock st,tunit tu where h.cbillcode=b.cbillcode and h.outsto=st.pk_scode
+			   and st.pk_ucode=tu.pk_ucode and  (h.cbillcode || b.carnum||h.team) = #form_PID#  group by (h.cbillcode || b.carnum||h.team),tu.uname,h.operater,b.carcode,substr(b.outdate,0,10)
+	</select>
+
+	<select id="getTeamReport" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+        select s.team,p.invname,sum(D1*p.unitweight) D1,sum(D2*p.unitweight) D2,sum(D3*p.unitweight) D3,sum(D4*p.unitweight) D4,
+        sum(D5*p.unitweight) D5,sum(D6*p.unitweight) D6,sum(D7*p.unitweight) D7
+        ,sum(D8*p.unitweight) D8,sum(D9*p.unitweight) D9,sum(D10*p.unitweight) D10,sum(D11*p.unitweight) D11,sum(D12*p.unitweight) D12,
+         sum(D13*p.unitweight) D13,sum(D14*p.unitweight) D14,sum(D15*p.unitweight) D15,sum(D16*p.unitweight) D16
+        ,sum(D17*p.unitweight) D17,sum(D18*p.unitweight) D18,sum(D19*p.unitweight) D19,sum(D20*p.unitweight) D20,sum(D21*p.unitweight) D21,
+         sum(D22*p.unitweight) D22,sum(D23*p.unitweight) D23,sum(D24*p.unitweight) D24,sum(D25*p.unitweight) D25
+        ,sum(D26*p.unitweight) D26,sum(D27*p.unitweight) D27,sum(D28*p.unitweight) D28,sum(D29*p.unitweight) D29,sum(D30*p.unitweight) D30,
+        sum(D31*p.unitweight) D31,sum(incount*p.unitweight) snum
+          from (
+         select b.invcode,('20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate
+        ,case substr(b.vbatchcode,11,2) when '01' then incount else 0 end d1 
+        ,case substr(b.vbatchcode,11,2) when '02' then incount else 0 end d2
+        ,case substr(b.vbatchcode,11,2) when '03' then incount else 0 end d3
+        ,case substr(b.vbatchcode,11,2) when '04' then incount else 0 end d4
+        ,case substr(b.vbatchcode,11,2) when '05' then incount else 0 end d5
+        ,case substr(b.vbatchcode,11,2) when '06' then incount else 0 end d6
+        ,case substr(b.vbatchcode,11,2) when '07' then incount else 0 end d7
+        ,case substr(b.vbatchcode,11,2) when '08' then incount else 0 end d8
+        ,case substr(b.vbatchcode,11,2) when '09' then incount else 0 end d9
+        ,case substr(b.vbatchcode,11,2) when '10' then incount else 0 end d10
+        ,case substr(b.vbatchcode,11,2) when '11' then incount else 0 end d11
+        ,case substr(b.vbatchcode,11,2) when '12' then incount else 0 end d12
+        ,case substr(b.vbatchcode,11,2) when '13' then incount else 0 end d13
+        ,case substr(b.vbatchcode,11,2) when '14' then incount else 0 end d14
+        ,case substr(b.vbatchcode,11,2) when '15' then incount else 0 end d15
+        ,case substr(b.vbatchcode,11,2) when '16' then incount else 0 end d16
+        ,case substr(b.vbatchcode,11,2) when '17' then incount else 0 end d17
+        ,case substr(b.vbatchcode,11,2) when '18' then incount else 0 end d18
+        ,case substr(b.vbatchcode,11,2) when '19' then incount else 0 end d19
+        ,case substr(b.vbatchcode,11,2) when '20' then incount else 0 end d20
+        ,case substr(b.vbatchcode,11,2) when '21' then incount else 0 end d21
+        ,case substr(b.vbatchcode,11,2) when '22' then incount else 0 end d22
+        ,case substr(b.vbatchcode,11,2) when '23' then incount else 0 end d23
+        ,case substr(b.vbatchcode,11,2) when '24' then incount else 0 end d24
+        ,case substr(b.vbatchcode,11,2) when '25' then incount else 0 end d25
+        ,case substr(b.vbatchcode,11,2) when '26' then incount else 0 end d26
+        ,case substr(b.vbatchcode,11,2) when '27' then incount else 0 end d27
+        ,case substr(b.vbatchcode,11,2) when '28' then incount else 0 end d28
+        ,case substr(b.vbatchcode,11,2) when '29' then incount else 0 end d29
+        ,case substr(b.vbatchcode,11,2) when '30' then incount else 0 end d30
+        ,case substr(b.vbatchcode,11,2) when '31' then incount else 0 end d31
+        ,b.incount,h.cwarehouseid,h.cdispatcherid,substr(b.vbatchcode,16,2) team
+        from ic_general_b b,ic_general_h h where b.vbillcode=h.vbillcode and h.cdispatcherid='102'
+        union all
+        select b.invcode,('20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate
+        ,case substr(b.vbatchcode,11,2) when '01' then -incount else 0 end d1 
+        ,case substr(b.vbatchcode,11,2) when '02' then -incount else 0 end d2
+        ,case substr(b.vbatchcode,11,2) when '03' then -incount else 0 end d3
+        ,case substr(b.vbatchcode,11,2) when '04' then -incount else 0 end d4
+        ,case substr(b.vbatchcode,11,2) when '05' then -incount else 0 end d5
+        ,case substr(b.vbatchcode,11,2) when '06' then -incount else 0 end d6
+        ,case substr(b.vbatchcode,11,2) when '07' then -incount else 0 end d7
+        ,case substr(b.vbatchcode,11,2) when '08' then -incount else 0 end d8
+        ,case substr(b.vbatchcode,11,2) when '09' then -incount else 0 end d9
+        ,case substr(b.vbatchcode,11,2) when '10' then -incount else 0 end d10
+        ,case substr(b.vbatchcode,11,2) when '11' then -incount else 0 end d11
+        ,case substr(b.vbatchcode,11,2) when '12' then -incount else 0 end d12
+        ,case substr(b.vbatchcode,11,2) when '13' then -incount else 0 end d13
+        ,case substr(b.vbatchcode,11,2) when '14' then -incount else 0 end d14
+        ,case substr(b.vbatchcode,11,2) when '15' then -incount else 0 end d15
+        ,case substr(b.vbatchcode,11,2) when '16' then -incount else 0 end d16
+        ,case substr(b.vbatchcode,11,2) when '17' then -incount else 0 end d17
+        ,case substr(b.vbatchcode,11,2) when '18' then -incount else 0 end d18
+        ,case substr(b.vbatchcode,11,2) when '19' then -incount else 0 end d19
+        ,case substr(b.vbatchcode,11,2) when '20' then -incount else 0 end d20
+        ,case substr(b.vbatchcode,11,2) when '21' then -incount else 0 end d21
+        ,case substr(b.vbatchcode,11,2) when '22' then -incount else 0 end d22
+        ,case substr(b.vbatchcode,11,2) when '23' then -incount else 0 end d23
+        ,case substr(b.vbatchcode,11,2) when '24' then -incount else 0 end d24
+        ,case substr(b.vbatchcode,11,2) when '25' then -incount else 0 end d25
+        ,case substr(b.vbatchcode,11,2) when '26' then -incount else 0 end d26
+        ,case substr(b.vbatchcode,11,2) when '27' then -incount else 0 end d27
+        ,case substr(b.vbatchcode,11,2) when '28' then -incount else 0 end d28
+        ,case substr(b.vbatchcode,11,2) when '29' then -incount else 0 end d29
+        ,case substr(b.vbatchcode,11,2) when '30' then -incount else 0 end d30
+        ,case substr(b.vbatchcode,11,2) when '31' then -incount else 0 end d31
+        ,-b.incount,h.cwarehouseid,h.cdispatcherid,substr(b.vbatchcode,16,2) team
+        from ic_general_b b,ic_general_h h where b.vbillcode=h.vbillcode and h.cdispatcherid='001'
+         union all
+        select substr(ob.vbatchcode,0,6),('20'||substr(ob.vbatchcode,7,2)||'-'||substr(ob.vbatchcode,9,2)||'-'||substr(ob.vbatchcode,11,2))
+        ,decode(substr(ob.vbatchcode,11,2),'01',-ob.outcount, 0) d1 
+        ,decode(substr(ob.vbatchcode,11,2),'02',-ob.outcount, 0) d2 
+        ,decode(substr(ob.vbatchcode,11,2),'03',-ob.outcount, 0) d3 
+        ,decode(substr(ob.vbatchcode,11,2),'04',-ob.outcount, 0) d4 
+        ,decode(substr(ob.vbatchcode,11,2),'05',-ob.outcount, 0) d5 
+        ,decode(substr(ob.vbatchcode,11,2),'06',-ob.outcount, 0) d6 
+        ,decode(substr(ob.vbatchcode,11,2),'07',-ob.outcount ,0) d7 
+        ,decode(substr(ob.vbatchcode,11,2),'08',-ob.outcount ,0) d8 
+        ,decode(substr(ob.vbatchcode,11,2),'09',-ob.outcount ,0) d9 
+        ,decode(substr(ob.vbatchcode,11,2),'10',-ob.outcount ,0) d10 
+              
+        ,decode(substr(ob.vbatchcode,11,2),'11',-ob.outcount ,0) d11 
+        ,decode(substr(ob.vbatchcode,11,2),'12',-ob.outcount, 0) d12 
+        ,decode(substr(ob.vbatchcode,11,2),'13',-ob.outcount ,0) d13 
+        ,decode(substr(ob.vbatchcode,11,2),'14',-ob.outcount, 0) d14 
+        ,decode(substr(ob.vbatchcode,11,2),'15',-ob.outcount, 0) d15 
+        ,decode(substr(ob.vbatchcode,11,2),'16',-ob.outcount, 0) d16 
+        ,decode(substr(ob.vbatchcode,11,2),'17',-ob.outcount, 0) d17 
+        ,decode(substr(ob.vbatchcode,11,2),'18',-ob.outcount, 0) d18 
+        ,decode(substr(ob.vbatchcode,11,2),'19',-ob.outcount, 0) d19 
+        ,decode(substr(ob.vbatchcode,11,2),'20',-ob.outcount, 0) d20 
+                        
+        ,decode(substr(ob.vbatchcode,11,2),'21',-ob.outcount, 0) d21 
+        ,decode(substr(ob.vbatchcode,11,2),'22',-ob.outcount, 0) d22 
+        ,decode(substr(ob.vbatchcode,11,2),'23',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'24',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'25',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'26',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'27',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'28',-ob.outcount, 0) d23 
+        ,decode(substr(ob.vbatchcode,11,2),'29',-ob.outcount, 0) d29 
+        ,decode(substr(ob.vbatchcode,11,2),'30',-ob.outcount, 0) d30 
+        ,decode(substr(ob.vbatchcode,11,2),'31',-ob.outcount, 0) d31 
+        ,-ob.outcount,oh.outsto,oh.cdispatcherid,substr(ob.vbatchcode,16,2) team
+        
+        from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='888'
+
+
+		) s,bd_invbasdoc p,tstock st 
+        where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode
+        	<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_mn" prepend="AND">
+					substr(s.indate,0,7) = #form_mn#
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					s.team=#form_stor#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+         group by rollup(s.team,p.invname)
+	</select>
+
+	<select id="getPnum2" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+        select p.invname,p.invtype,p.unitweight,p.invcode,sum(s.incount) incount,sum(s.incount*p.unitweight) incount2 from
+           (select h.cwarehouseid,b.vbatchcode,b.invcode,b.incount,nvl(b.pdate,'20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate,substr(b.vbatchcode,16,2) team from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '102'
+		    union all 
+           select h.cwarehouseid,b.vbatchcode,b.invcode,-b.incount,nvl(b.pdate,'20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) indate,substr(b.vbatchcode,16,2) team from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '001'
+		   union all 
+			 select oh.outsto,ob.vbatchcode,substr(ob.vbatchcode,0,6),-ob.outcount,
+			('20'||substr(ob.vbatchcode,7,2)||'-'||substr(ob.vbatchcode,9,2)||'-'||substr(ob.vbatchcode,11,2)) ,substr(b.vbatchcode,16,2) team
+			from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='888'
+           ) s,bd_invbasdoc p,tstock st where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode
+			<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						substr(s.indate,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(s.indate,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					s.team=#form_stor#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+         group by p.invname,p.invtype,p.unitweight,p.invcode
+	</select>
+
+
+
+
+	<select id="getnewPnum2" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+ select p.invname,p.invtype,p.unitweight,p.invcode,sum(s.incount) incount,sum(s.incount*p.unitweight) incount2 
+ ,sum(s.outconut) outconut,sum(s.outconut*p.unitweight) outconut2 from (
+      select h.cwarehouseid,b.vbatchcode,b.invcode,b.incount,
+      h.hindate indate,h.team,0 outconut 
+      from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '102'
+	    union all
+   select h.cwarehouseid,b.vbatchcode,b.invcode,b.incount,
+      h.hindate indate,h.team,0 outconut 
+      from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '999'
+	  	    union all
+   select h.cwarehouseid,b.vbatchcode,b.invcode,b.incount,
+      h.hindate indate,h.team,0 outconut 
+      from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '111'
+       union all 
+           select oh.outsto,ob.vbatchcode,substr(ob.vbatchcode,0,6),-ob.outcount,oh.houtdate,
+          oh.team ,0 outconut
+      from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='888'
+
+      union all
+       select oh.outsto,ob.vbatchcode,substr(ob.vbatchcode,0,6),-ob.outcount,oh.houtdate,
+           oh.team ,0 outconut
+      from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='002' 
+      
+       union all
+       
+      select oh.outsto,ob.vbatchcode,substr(ob.vbatchcode,0,6),0 outconut,oh.houtdate,oh.team ,ob.outcount
+      from OUTSTOREBILL_H oh ,OUTSTOREBILL_B ob where oh.cbillcode=ob.cbillcode and trim(oh.cdispatcherid)='235' 
+       union all
+       
+       
+     select h.cwarehouseid,b.vbatchcode,b.invcode,0 outconut,h.hindate indate,h.team ,-b.incount
+      from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode  and h.cdispatcherid = '001'
+      
+           ) s,bd_invbasdoc p,tstock st where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode
+
+			<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						substr(s.indate,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(s.indate,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					s.team=#form_stor#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+
+ group by p.invname,p.invtype,p.unitweight,p.invcode     
+
+</select>
+
+
+	<select id="selectInbill2" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+			  select b.vbillcode, b.vbatchcode,p.invname,p.invtype,p.unit,b.incount,('20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)) pdate,b.indate from ic_general_b b,ic_general_h h,tstock st,tunit tu, bd_invbasdoc p
+              where h.vbillcode=b.vbillcode and trim(h.cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode and b.invcode=p.invcode  and trim(h.cdispatcherid)='102'
+			<dynamic>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						substr(h.hindate,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(h.hindate,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+			</dynamic>
+			order by indate desc) A ) B where B.ROWNO between #START# and #END#
+	</select>
+
+	<select id="selectInbill" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+			   select distinct h.vbillcode,tu.uname,st.sname,tin.indisname,h.team,h.hindate indate
+			   from ic_general_h h,tstock st,tunit tu,tindisclass tin
+              where trim(h.cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+              and trim(h.cdispatcherid)=tin.indiscode
+			<dynamic>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						h.hindate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+						h.hindate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+                <isNotEmpty property="form_team" prepend="AND">
+					h.team=#form_team#
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_indiscode" prepend="AND">
+					trim(h.cdispatcherid)=#form_indiscode#
+				</isNotEmpty>
+			</dynamic>
+			order by h.vbillcode desc) A ) B where B.ROWNO between #START# and #END#
+	</select>
+	<select id="getindiscode" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select t.INDISCODE,t.INDISNAME from tindisclass t
+	</select>
+
+     <select id="getoutdiscode" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select t.OUTDISCODE,t.OUTDISNAME from toutdisclass t
+	</select>
+
+	<update id="updateInbill2" parameterClass="java.util.Map">
+		update ic_general_b set pdate=#form_pdate# where vbillcode=#form_vbillcode# and vbatchcode=#form_vbatchcode# and indate=#form_indate#
+	</update>
+	<select id="selectInbillById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		      select distinct h.vbillcode,tu.uname,st.sname,tin.indisname,h.team,h.hindate indate from ic_general_h h,tstock st,tunit tu,tindisclass tin
+              where trim(h.cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+              and trim(h.cdispatcherid)=tin.indiscode and h.vbillcode= #form_PID#
+   </select>
+	<select id="selectInbill2ById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			  select b.vbillcode, b.vbatchcode,p.invname,p.invtype,p.unit,'20'||substr(b.vbillcode,0,2)||'-'||substr(b.vbillcode,3,2)||'-'||substr(b.vbillcode,5,2) indate,sum(b.incount) incount from ic_general_b b, bd_invbasdoc p
+              where b.invcode=p.invcode and b.vbillcode=#form_PID# group by b.vbillcode, b.vbatchcode,p.invname,p.invtype,p.unit,indate
+	</select>
+
+	<select id="selectDayInbill" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+			   select distinct (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2) ||tin.indiscode||h.team) vbillcode,tu.uname,st.sname,tin.indisname,h.team,h.hindate indate
+			   from ic_general_h h,tstock st,tunit tu,tindisclass tin
+              where trim(h.cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+              and trim(h.cdispatcherid)=tin.indiscode
+			<dynamic>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						h.hindate >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+						h.hindate <= #form_endtime#
+					]]>
+				</isNotEmpty>
+
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+
+				<isNotEmpty property="form_team" prepend="AND">
+					h.team=#form_team#
+				</isNotEmpty>
+
+				<isNotEmpty property="form_indiscode" prepend="AND">
+					trim(h.cdispatcherid)=#form_indiscode#
+				</isNotEmpty>
+			</dynamic>
+			order by (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2) ||tin.indiscode||h.team) desc) A ) B where B.ROWNO between #START# and #END#
+	</select>
+	<select id="selectDayInbillById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+		      select distinct (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||tin.indiscode||h.team) vbillcode,tu.uname,st.sname,tin.indisname,h.team,h.hindate indate from ic_general_h h,tstock st,tunit tu,tindisclass tin
+              where trim(h.cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+              and trim(h.cdispatcherid)=tin.indiscode and (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||tin.indiscode||h.team)= #form_PID#
+   </select>
+	<select id="selectDayInbill2ById" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			  select (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||trim(h.cdispatcherid)||h.team) vbillcode,p.invname,p.invtype,p.unit,h.hindate indate,sum(b.incount) incount from ic_general_h h,ic_general_b b, bd_invbasdoc p where h.vbillcode=b.vbillcode and b.invcode=p.invcode
+			  and (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||trim(h.cdispatcherid)||h.team)=#form_PID#
+			   group by 
+			 (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||trim(h.cdispatcherid)||h.team), 
+			p.invname,p.invtype,p.unit,h.hindate
+	</select>
+
+	<select id="selectDayInbill2" parameterClass="java.util.Map"
+		resultClass="java.util.HashMap">
+			  select rowidtochar(b.rowid) as pkrowid,(substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||trim(h.cdispatcherid)||h.team) vbillcode,
+			
+			  b.vbatchcode,p.invname,p.invtype,p.unit,h.hindate indate,b.incount,b.indate sdate from ic_general_h h,ic_general_b b, bd_invbasdoc p
+              where h.vbillcode=b.vbillcode and b.invcode=p.invcode and (substr(h.hindate,0,4)||substr(h.hindate,6,2)||substr(h.hindate,9,2)||trim(h.cdispatcherid)||h.team)=#form_PID# and p.invname=#form_pname#
+	</select>
+
+<select id="selectyjjb"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+ select p.ncinvcode,decode(trim(cls),'210','(倒包装)')||p.invname as invname,p.unit,sum(fnum) fsum,sum(innum) insum,
+ sum(outnum) outnum,sum(enum) enum,sum(enum1) enum1,sum(diff) as diff,rs.invcode,cls from (
+
+   select b.invcode,decode(trim(b.cls),'108','210','210',trim(b.cls)) as cls, b.realcount fnum,0 innum,0 outnum, realcount enum , 0 enum1, b.diffcount as diff
+    from daystock_b b where  b.billid=(  select d.billid from  daystock_h d where d.reportdate = (select max(h.reportdate) from daystock_h h))
+   union all
+   select b.invcode,
+   decode(trim(h.cdispatcherid),'108','210','210',trim(h.cdispatcherid)) as cls,0,b.incount, 0,b.incount,0,0 from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode and h.hindate=#form_searchdate# and trim(h.cwarehouseid)=#form_stockId# and h.team=#form_bz#
+   union all
+   select substr(tb.vbatchcode,0,6),decode(trim(th.CDISPATCHERID),'108','210','210',trim(th.CDISPATCHERID)) as cls,0,0,tb.outcount,-tb.outcount,0,0 from outstorebill_h th,outstorebill_b tb 
+   where th.cbillcode=tb.cbillcode and th.houtdate=#form_searchdate# and trim(th.outsto)=#form_stockId# and th.team=#form_bz#
+   union all
+   select d.incode,d.cls,0,0,0,0,d.read enum1 ,d.diffs from Daystock_temp d where d.billid = #form_billid#
+    ) rs,bd_invbasdoc p where rs.invcode=p.invcode group by p.invname,p.unit, rs.invcode,cls , p.ncinvcode
+ </select>
+
+<select id="newselectyjjb"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+
+ select rs.invcode,p.ncinvcode,decode(trim(cls),'210','(倒包装)')||p.invname as invname
+,p.unit,sum(incount)as ysnum ,sum(enum1) enum1,sum(diffs) diffs,rs.cls 
+from (    
+select b.invcode,    decode(trim(h.cdispatcherid),'108','210','210',trim(h.cdispatcherid),'0') as cls 
+,b.incount , 0 enum1 ,0 diffs    
+from ic_general_h h,ic_general_b b   
+where h.vbillcode=b.vbillcode and h.hindate &lt;=#form_searchdate# and   trim(h.CWAREHOUSEID)=#form_stockId# 
+union all 
+select substr(tb.vbatchcode,0,6)
+,decode(trim(th.CDISPATCHERID),'108','210','210',trim(th.CDISPATCHERID),'0') as cls  
+,-tb.outcount, 0 enum1,0 diffs   
+from outstorebill_h th,outstorebill_b tb
+where th.cbillcode=tb.cbillcode and th.houtdate &lt;= #form_searchdate# and trim(th.outsto)=#form_stockId# 
+union all
+select b.invcode, decode(trim(b.cls),'108','210','210',trim(b.cls)) as cls 
+,b.diffcount , 0 enum1 ,0 diffs 
+from daystock_h h,daystock_b b 
+where  b.billid=h.billid and trim(h.cwarehouseid) =#form_stockId#  and  h.makedate &lt;=#form_searchdate#    
+ union all
+select d.incode,d.cls,0,d.read enum1 ,d.diffs from Daystock_temp d where d.billid = #form_billid#
+) rs,bd_invbasdoc p where rs.invcode=p.invcode  
+ group by
+  p.ncinvcode,decode(trim(cls),'210','(倒包装)')||p.invname ,p.unit,rs.invcode,rs.cls
+
+ </select>
+
+ <select id="selectybjjb"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+    select decode(trim(cls),'210','(倒包装)')||n.invname as invname ,n.unit,t.precount as fsum ,t.incount as insum,t.outcount as outnum,t.havcount as enum,t.realcount as readnum,t.diffcount as diff from daystock_b t , daystock_h h,bd_invbasdoc n where h.billid = t.billid and n.invcode = t.invcode and h.makedate=#form_searchdate# and trim(h.team)=#form_bz# and trim(h.cwarehouseid)=#form_stockId#
+ </select>
+
+
+<select id="newselectybjjb"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+ select rs.invcode,p.ncinvcode,decode(trim(cls),'210','(倒包装)')||p.invname as invname
+,p.unit,sum(incount)as ysnum ,sum(enum1) enum1,sum(diffs) diffs,sum(REALCOUNT) REALCOUNT,rs.cls 
+from (    
+select b.invcode,    decode(trim(h.cdispatcherid),'108','210','210',trim(h.cdispatcherid),'0') as cls 
+,b.incount , 0 enum1 ,0 diffs  ,0 REALCOUNT  
+from ic_general_h h,ic_general_b b   
+where h.vbillcode=b.vbillcode and h.hindate &lt;=#form_searchdate#  and   trim(h.CWAREHOUSEID)=#form_stockId# 
+union all 
+select substr(tb.vbatchcode,0,6)
+,decode(trim(th.CDISPATCHERID),'108','210','210',trim(th.CDISPATCHERID),'0') as cls  
+,-tb.outcount, 0 enum1,0 diffs   ,0 REALCOUNT
+from outstorebill_h th,outstorebill_b tb
+where th.cbillcode=tb.cbillcode and th.houtdate &lt;=#form_searchdate#  and trim(th.outsto)=#form_stockId# 
+union all
+select b.invcode, decode(trim(b.cls),'108','210','210',trim(b.cls),'0') as cls 
+,b.diffcount , 0 enum1 ,b.diffcount ,b.REALCOUNT
+from daystock_h h,daystock_b b 
+where  b.billid=h.billid and trim(h.cwarehouseid) =#form_stockId#  and  h.makedate &lt;=#form_searchdate#   
+
+) rs,bd_invbasdoc p where rs.invcode=p.invcode  
+ group by
+  p.ncinvcode,decode(trim(cls),'210','(倒包装)')||p.invname ,p.unit,rs.invcode,rs.cls
+ </select>
+
+<select id="selectjbcount"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+    select count(*) as con from  daystock_h where billid = #billid#
+</select>
+
+
+  <insert id="addDAYSTOCK_B" parameterClass="java.util.Map"  >
+     insert into DAYSTOCK_B (BILLID,INVCODE,PRECOUNT,INCOUNT,OUTCOUNT,HAVCOUNT,DIFFCOUNT,REALCOUNT,CLS) 
+	 values(#form_billid#,#form_invcode#,#form_precount#,#form_incount#,#form_outcount#,#form_havcount#,#form_diffcount#,#form_realcount#,#form_cls#)
+ </insert>
+
+<insert id="addDAYSTOCK_H" parameterClass="java.util.Map"  >
+    insert into DAYSTOCK_H (BILLID,CWAREHOUSEID,TEAM,MAKEDATE) values(#form_billid#,#from_cwarehouseid#,#form_team#,#from_makedate#)
+  </insert>
+
+<insert id="addDAYSTOCK_TEMP" parameterClass="java.util.Map"  >
+    insert into DAYSTOCK_TEMP (BILLID,INCODE,CLS,READ,DIFFS) values (#form_billid#,#form_invcode#,#form_cls#,#form_realcount#,#form_diffcount#)
+</insert>
+
+<select id="isEmptyDAYSTOCK_TEMP"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	select count(*) as con from DAYSTOCK_TEMP where BILLID = #billid#
+</select>
+
+ <update id="updateDAYSTOCK_TEMP" parameterClass="java.util.Map">
+	 delete from DAYSTOCK_TEMP where BILLID = #form_billid#
+</update>
+
+
+<select id="queryin"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+select B.* from (  select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total  from ( 
+    select t.vbillcode,
+      ( select distinct st.sname from tstock st where  trim(t.cwarehouseid) = st.pk_scode ) as sname
+       ,team, hindate, t.operater,  
+      ( select tin.indisname from tindisclass tin where trim(tin.indiscode) = trim(t.cdispatcherid)) as tt
+	
+       from ic_general_h t  ,ic_general_b b where b.vbillcode = t.vbillcode
+<dynamic> 
+   <isNotEmpty property="form_cwarehouseid" prepend="AND">
+        trim(t.cwarehouseid) = #form_cwarehouseid#
+  </isNotEmpty>
+   <isNotEmpty property="form_hindate" prepend="AND">
+      t.hindate = #form_hindate#
+  </isNotEmpty>
+   <isNotEmpty property="form_operater" prepend="AND">
+      t.operater like '%$form_operater$%'
+  </isNotEmpty>
+  <isNotEmpty property="form_team" prepend="AND">
+      t.team = #form_team#
+  </isNotEmpty>
+  <isNotEmpty property="form_cdispatcherid" prepend="AND">
+      trim(t.cdispatcherid) = #form_cdispatcherid#
+  </isNotEmpty>
+  
+</dynamic>
+ order by t.hindate desc,t.team
+ ) A  ) B where B.ROWNO between #START# and #END#
+</select>
+
+<select id="viewininfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+   select t.vbillcode,t.vbatchcode,t.incount,t.indate, indate,
+   bd.invname,rowidtochar(t.rowid) as pkrowid from ic_general_b t,bd_invbasdoc bd where t.invcode = bd.invcode 
+   and t.vbillcode = #form_PID#
+
+</select>
+
+<select id="modifyininfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+ select t.vbillcode,t.vbatchcode,t.incount,t.indate,
+   bd.invname,rowidtochar(t.rowid) as pkrowid
+    from ic_general_b t,bd_invbasdoc bd where t.invcode = bd.invcode     and t.rowid = CHARTOROWID(#form_PID#)
+</select>
+
+
+
+
+<update id="deletein"  parameterClass="java.util.Map">
+     delete from  ic_general_h  where vbillcode = #form_PID#
+</update>
+
+<select id="selectcode"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+     select vbillcode from ic_general_b  where rowidtochar(rowid) = #form_PID#
+</select>
+
+<select id="selectcount"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+     select count(*) CON  from ic_general_b  where trim(vbillcode) = #form_PID#
+</select>
+
+<update id="deleteininfo"  parameterClass="java.util.Map" >
+     delete from ic_general_b  where rowidtochar(rowid) = #form_PID#
+</update>
+
+
+
+
+<update id="updateininfo"  parameterClass="java.util.Map">
+     update  ic_general_b set incount = #form_incount#  where rowidtochar(rowid) = #form_PID#
+</update>
+
+
+
+
+
+
+<select id="queryout"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+  select B.* from (
+  select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+ from (
+  select distinct t.cbillcode,st.sname,team,houtdate,t.operater,  
+(select tin.outdisname from toutdisclass tin where trim(tin.outdiscode) = trim(t.cdispatcherid)) as tt
+ ,b.CARCODE ,b.carnum from outstorebill_h t, outstorebill_b b ,tstock st where t.CBILLCODE = b.CBILLCODE and trim(t.outsto) = st.pk_scode 
+ <dynamic> 
+   <isNotEmpty property="form_cwarehouseid" prepend="AND">
+        trim(t.outsto) = #form_cwarehouseid#
+  </isNotEmpty>
+   <isNotEmpty property="form_houtdate" prepend="AND">
+      t.houtdate = #form_houtdate#
+  </isNotEmpty>
+   <isNotEmpty property="form_operater" prepend="AND">
+      t.operater like '%$form_operater$%'
+  </isNotEmpty>
+  <isNotEmpty property="form_team" prepend="AND">
+      t.team = #form_team#
+  </isNotEmpty>
+  <isNotEmpty property="form_cdispatcherid" prepend="AND">
+      trim(t.cdispatcherid) = #form_cdispatcherid#
+  </isNotEmpty>
+
+    <isNotEmpty property="form_CARCODE" prepend="AND">
+      trim(b.CARCODE) = #form_CARCODE#
+  </isNotEmpty>
+
+    <isNotEmpty property="form_CARNUM" prepend="AND">
+      trim(b.CARNUM) = #form_CARNUM#
+  </isNotEmpty>
+</dynamic>
+  order by t.houtdate desc,t.team,b.CARCODE,b.carnum
+ ) A ) B where B.ROWNO between #START# and #END#
+</select>
+
+<select id="viewoutinfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+   select t.cbillcode,t.vbatchcode,t.outcount,t.outdate,
+   bd.invname,rowidtochar(t.rowid) as pkrowid from outstorebill_b t,bd_invbasdoc bd where substr(t.vbatchcode,0,6) = bd.invcode 
+   and t.cbillcode = #form_PID#
+</select>
+
+<select id="modifyoutinfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+  select t.cbillcode,t.vbatchcode,t.outcount,t.outdate,
+   bd.invname,rowidtochar(t.rowid) as pkrowid from outstorebill_b t,bd_invbasdoc bd where substr(t.vbatchcode,0,6) = bd.invcode 
+   and t.rowid = CHARTOROWID(#form_PID#)
+</select>
+
+<update id="updateoutinfo"  parameterClass="java.util.Map">
+    update outstorebill_b  set outcount=#form_out#   where rowidtochar(rowid) = #form_PID#
+</update>
+
+
+
+
+<update id="deleteoutinfo"  parameterClass="java.util.Map">
+     delete from outstorebill_b  where rowidtochar(rowid) = #form_PID#
+</update>
+
+
+<select id="selectoutcode"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+     select cbillcode from outstorebill_b  where rowidtochar(rowid) = #form_PID#
+</select>
+
+<select id="selectoutcount"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+     select count(*) CON  from outstorebill_b  where trim(cbillcode) = #form_PID#
+</select>
+
+<update id="deleteout"  parameterClass="java.util.Map">
+
+    delete from  outstorebill_h where cbillcode = #form_PID#
+
+</update>
+
+
+
+<select id="selectinhistory"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+ select p.invname, t.indisname,p.invtype,trim(cdispatcherid) cdispatcherid,p.unitweight,p.invcode,sum(s.incount) incount,sum(s.incount*p.unitweight) incount2 from
+(select h.cwarehouseid,h.cdispatcherid,b.vbatchcode,b.invcode,b.incount,0 outcount,h.hindate indate from ic_general_h h,ic_general_b b where h.vbillcode=b.vbillcode     
+) s,bd_invbasdoc p,tstock st,tindisclass t where s.invcode=p.invcode and trim(s.cwarehouseid)=st.pk_scode and t.indiscode = trim(cdispatcherid) 
+
+<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							substr(s.indate,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(s.indate,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_storname" prepend="AND">
+					st.pk_scode=#form_storname#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+               
+			   	<isNotEmpty property="form_indiscode" prepend="AND">
+					cdispatcherid like '%$form_indiscode$%'
+				</isNotEmpty>
+
+</dynamic>
+
+
+group by p.invname,p.invtype,p.unitweight,p.invcode ,cdispatcherid ,indisname  order by   cdispatcherid 
+
+</select>
+
+
+<select id="selectouthistory"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+ select p.invname, t.outdisname,p.invtype,trim(cdispatcherid) cdispatcherid,p.unitweight,p.invcode,sum(s.outcount) incount,sum(s.outcount*p.unitweight) incount2 from(
+ 
+   select h.outsto,b.vbatchcode,substr(b.vbatchcode,0,6) invcode,b.outcount,h.houtdate,h.cdispatcherid from outstorebill_h h,outstorebill_b b where h.cbillcode=b.cbillcode
+    
+ ) s,bd_invbasdoc p,tstock st,toutdisclass t where s.invcode=p.invcode and trim(s.outsto)=st.pk_scode  and t.outdiscode = trim(cdispatcherid) 
+<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+							substr(s.houtdate,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(s.houtdate,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_storname" prepend="AND">
+					st.pk_scode=#form_storname#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+               
+			   	<isNotEmpty property="form_indiscode" prepend="AND">
+					cdispatcherid like '%$form_indiscode$%'
+				</isNotEmpty>
+
+</dynamic>
+
+group by p.invname,p.invtype,p.unitweight,p.invcode, cdispatcherid ,outdisname  order by   cdispatcherid   
+
+</select>
+
+<select id="selectoutbilllisttype"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+     select B.* from (
+        	select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+        	 from (
+			   select distinct h.CBILLCODE,tu.uname,st.sname,tin.outdisname,h.team,h.HOUTDATE,h.OPERATER
+			   from outstorebill_h h,tstock st,tunit tu,toutdisclass tin
+              where trim(h.outsto)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+              and trim(h.cdispatcherid)=tin.outdiscode
+<dynamic>
+				<isNotEmpty property="form_begintime" prepend="AND">
+					<![CDATA[
+						substr(HOUTDATE,0,10) >= #form_begintime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_endtime" prepend="AND">
+					<![CDATA[
+							substr(HOUTDATE,0,10) <= #form_endtime#
+					]]>
+				</isNotEmpty>
+				<isNotEmpty property="form_outdiscode" prepend="AND">
+					trim(h.cdispatcherid)=#form_outdiscode#
+				</isNotEmpty>
+			    <isNotEmpty property="form_team" prepend="AND">
+					h.team=#form_team#
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+	</dynamic>
+
+     order by h.CBILLCODE desc) A ) B where B.ROWNO between #START# and #END#  
+</select>
+
+<select id="selectoutbillByIdtype"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+        select b.cbillcode, substr(b.vbatchcode,0,6) vbatchcode,p.invname,p.invtype,p.unit,
+         '20'||substr(b.cbillcode,0,2)||'-'||substr(b.cbillcode,3,2)||'-'||substr(b.cbillcode,5,2) indate,
+         sum(b.outcount) outcount 
+         from outstorebill_b b, bd_invbasdoc p
+          where substr(b.vbatchcode,0,6)=p.invcode and b.cbillcode= #form_PID#
+         group by b.cbillcode, b.vbatchcode,p.invname,p.invtype,p.unit    
+</select>
+
+<select id="selectoutbillByIdtype2"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+ select rowidtochar(b.rowid) as pkrowid, h.cbillcode,b.vbatchcode,p.invname,p.invtype,p.unit
+  ,h.houtdate outdate,b.outcount ,b.outdate sdate 
+ from outstorebill_h h,outstorebill_b b, bd_invbasdoc p
+  where h.cbillcode= b.cbillcode and substr(b.vbatchcode,0,6)=p.invcode and  h.cbillcode=#form_PID# and p.invname=#form_pname#
+</select>
+
+
+<select id="selectoutbillByIdcar2"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+ select rowidtochar(b.rowid) as pkrowid, h.cbillcode,b.vbatchcode,p.invname,p.invtype,p.unit
+   ,(select t.outdisname from toutdisclass t where trim(t.outdiscode) = trim(h.cdispatcherid)) outdisname
+  ,h.houtdate outdate,b.outcount ,b.outdate sdate 
+ from outstorebill_h h,outstorebill_b b, bd_invbasdoc p
+  where h.cbillcode= b.cbillcode and substr(b.vbatchcode,0,6)=p.invcode 
+  and  (REPLACE(h.houtdate,'-','') ||b.carcode||b.carnum||h.team)=#form_PID# and p.invname=#form_pname#
+</select>
+
+
+<select id="ingather"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+select db.invcode,p.invname,p.invtype,sum(qznum) qznum
+,sum(incp) incp,sum(inth) inth,sum(infx) infx,sum(inzp) inzp , sum(indk) indk,sum(indb) indb
+,sum(outcp) outcp,sum(outfx) outfx,sum(outdk) outdk,sum(outdb) outdb,sum(diff) diff
+from(
+select trim(b.INVCODE) invcode, b.incount qznum,0 incp,0 inth,0 infx,0 inzp,0 indk,0 indb,0 outcp, 0  outfx,0 outdk,0 outdb,h.hindate,h.cwarehouseid,0 diff
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE and  h.hindate &lt; #form_begintime#
+<dynamic>
+		<isNotEmpty property="form_factory" prepend="AND">
+					trim(h.cwarehouseid)=#form_factory#
+		</isNotEmpty>
+
+</dynamic>
+
+union all  
+
+select substr(b.vbatchcode,0,6) invcode,-b.outcount,0 incp,0 inth,0 infx,0 inzp,0 indk,0 indb,0 outcp, 0  outfx,0 outdk,0 outdb,h.houtdate,h.OUTSTO ,0 diff
+from outstorebill_h h,outstorebill_b b
+where h.cbillcode= b.cbillcode and  h.houtdate &lt; #form_begintime#
+<dynamic>
+		<isNotEmpty property="form_factory" prepend="AND">
+					trim(h.OUTSTO)=#form_factory#
+		</isNotEmpty>
+
+</dynamic>
+
+union all  
+select b.invcode, b.diffcount as diff,0 incp,0 inth,0 infx,0 inzp,0 indk,0 indb,0 outcp, 0  outfx,0 outdk,0 outdb,h.makedate,h.cwarehouseid,0 diff
+from daystock_h h,daystock_b b where  b.billid=h.billid 
+and h.makedate &lt; #form_begintime#
+
+<dynamic>
+		<isNotEmpty property="form_factory" prepend="AND">
+				trim(h.cwarehouseid)=#form_factory#
+		</isNotEmpty>
+</dynamic>
+
+union all 
+
+select trim(b.INVCODE) invcode ,0 qznum
+,decode(trim(h.cdispatcherid),'102',b.incount,0) incp,decode(trim(h.cdispatcherid),'001',b.incount,0) inth,
+ decode(trim(h.cdispatcherid),'999',b.incount,0) infx,decode(trim(h.cdispatcherid),'111',b.incount,0) inzp,
+decode(trim(h.cdispatcherid),'151',b.incount,0) indk,decode(trim(h.cdispatcherid),'108',b.incount,0) indb
+,0 outcp, 0  outfx,0 outdk,0 outdb,h.hindate,h.cwarehouseid,0 diff
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE  
+<dynamic>
+		<isNotEmpty property="form_begintime" prepend="AND">
+			<![CDATA[
+				h.hindate >= #form_begintime#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="form_endtime" prepend="AND">
+			<![CDATA[
+					h.hindate <= #form_endtime#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="form_factory" prepend="AND">
+					trim(h.cwarehouseid)=#form_factory#
+		</isNotEmpty>
+
+</dynamic>
+
+ 
+union all 
+  
+select substr(b.vbatchcode,0,6)  invcode,0 qznum
+,0 incp,0 inth,0 infx,0 inzp,0 indk,0 indb
+ ,decode(trim(h.cdispatcherid),'235',b.outcount,0) outcp, decode(trim(h.cdispatcherid),'888',b.outcount,0)  outfx,
+ decode(trim(h.cdispatcherid),'237',b.outcount,0) outdk,decode(trim(h.cdispatcherid),'210',b.outcount,0) outdb,h.houtdate,h.OUTSTO,0 diff 
+ from outstorebill_h h,outstorebill_b b
+ where h.cbillcode= b.cbillcode 
+ <dynamic>
+		<isNotEmpty property="form_begintime" prepend="AND">
+			<![CDATA[
+				h.houtdate >= #form_begintime#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="form_endtime" prepend="AND">
+			<![CDATA[
+				h.houtdate <= #form_endtime#
+			]]>
+		</isNotEmpty>
+
+		<isNotEmpty property="form_factory" prepend="AND">
+					trim(h.OUTSTO)=#form_factory#
+		</isNotEmpty>
+
+</dynamic>
+
+ union all  
+select b.invcode, 0,0 incp,0 inth,0 infx,0 inzp,0 indk,0 indb,0 outcp, 0  outfx,0 outdk,0 outdb,h.makedate
+,h.cwarehouseid,b.diffcount as diff from daystock_h h,daystock_b b
+where  b.billid=h.billid 
+<dynamic>
+		<isNotEmpty property="form_begintime" prepend="AND">
+			<![CDATA[
+				h.makedate >= #form_begintime#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="form_endtime" prepend="AND">
+			<![CDATA[
+					h.makedate <= #form_endtime#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty property="form_factory" prepend="AND">
+					trim(h.cwarehouseid)=#form_factory#
+		</isNotEmpty>
+
+</dynamic>
+ )db , bd_invbasdoc p where db.invcode =p.invcode group by db.invcode,p.invname,p.invtype
+ </select>
+
+<select id="qzquery"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+  select B.* from (
+  select A.*,ROWNUM ROWNO,last_value(ROWNUM) over() as total
+ from (
+  select uname,st.sname,p.invname,p.invtype,p.unitweight,p.invcode,vbatchcode
+  ,sum(s.kznum) incount from(
+  select trim(b.INVCODE) invcode ,b.incount kznum,b.vbatchcode,h.cwarehouseid
+,'20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2) scdata
+from ic_general_h h,ic_general_b b
+where h.VBILLCODE= b.VBILLCODE
+
+ 
+union all 
+
+select substr(b.VBATCHCODE,0,6)  invcode,-b.outcount kznum,b.vbatchcode,
+h.OUTSTO cwarehouseid
+,'20'||substr(b.vbatchcode,7,2)||'-'||substr(b.vbatchcode,9,2)||'-'||substr(b.vbatchcode,11,2)
+ from outstorebill_h h,outstorebill_b b
+ where h.cbillcode= b.cbillcode 
+ 
+ )s,bd_invbasdoc p,tstock st,tunit tu,tindisclass tin
+
+  where s.invcode=p.invcode and trim(cwarehouseid)=st.pk_scode and st.pk_ucode=tu.pk_ucode 
+<dynamic>
+				<isNotEmpty property="form_ptype" prepend="AND">
+					p.ncinvcode like '$form_ptype$%'
+				</isNotEmpty>
+				<isNotEmpty property="form_scdata" prepend="AND">
+					<![CDATA[
+						trim(s.scdata) = #form_scdata#
+					]]>
+				</isNotEmpty>
+			    <isNotEmpty property="form_vbatchcode" prepend="AND">
+					<![CDATA[
+						trim(vbatchcode) = #form_vbatchcode#
+					]]>
+				</isNotEmpty>
+				
+				<isNotEmpty property="form_factory" prepend="AND">
+					st.pk_ucode=#form_factory#
+				</isNotEmpty>
+				<isNotEmpty property="form_stor" prepend="AND">
+					s.team=#form_stor#
+				</isNotEmpty>
+				<isNotEmpty property="form_pname" prepend="AND">
+					p.invname like '%$form_pname$%'
+				</isNotEmpty>
+			</dynamic>
+  group by p.invname,p.invtype,p.unitweight,p.invcode,vbatchcode,sname,uname
+  ) A ) B where B.ROWNO between #START# and #END#  
+</select>
+
+<select id="querycar"   resultClass="java.util.HashMap">
+      select storname,            
+       sum(allnum) allnum,           
+       sum(alloutnum) alloutnum,      
+       sum(waitnum) waitnum,        
+       sum(sout) sout,               
+       sum(upnum) upnum,             
+       min(startdate) startdate,     
+       sum(souting) souting,         
+      get_store_time(store) planenddate                 
+  from (select sa.storname,
+               sa.pk_stordoc store,
+               ha.cgeneralhid,
+               1 allnum,
+               sum(ba.nshouldoutnum) alloutnum,
+               0 waitnum,
+               0 sout,
+               0 upnum,
+               '' startdate,
+               0 souting
+          from ic_general_h_nc ha, ic_general_b_nc ba, BD_STORDOC_nc sa
+         where ha.cgeneralhid = ba.cgeneralhid
+           and ha.cwarehouseid = sa.pk_stordoc
+           and ha.fbillflag = '2'
+           and ha.dbilldate > '2008-10-01'
+           and ha.cbilltypecode = '4C'
+           and ha.dr = 0
+           and ba.dr = 0
+           and sa.pk_corp = '1001'
+         group by sa.storname, ha.cgeneralhid,sa.pk_stordoc
+        union all
+        select s.storname,
+               t.store,
+               b.cgeneralhid,
+               0 allnum,
+               0 alloutnum,
+               1 waitnum,
+               nvl(sum(b.nshouldoutnum), 0) sout,
+               0 upnum,
+               '' startdate,
+               0 souting
+          from cartest t, ic_general_b_nc b, BD_STORDOC_NC s
+         where b.dr = 0
+           and t.pk_nc_out = b.cgeneralhid
+           and t.store = s.pk_stordoc
+           and t.startdate is null
+         group by s.storname, t.store, b.cgeneralhid
+        union all
+        select ss.storname,
+        tt.store,
+               bb.cgeneralhid,
+               0 allnum,
+               0 alloutnum,
+               0 waitnum,
+               0 sout,
+               1 upnum,
+               startdate,
+               nvl(sum(bb.nshouldoutnum), 0) souting
+          from cartest tt, ic_general_b_nc bb, BD_STORDOC_NC ss
+         where bb.dr = 0
+           and tt.pk_nc_out = bb.cgeneralhid
+           and tt.store = ss.pk_stordoc
+           and tt.startdate is not null
+           and tt.enddate is null
+         group by ss.storname, tt.store, bb.cgeneralhid, startdate)
+ group by storname,get_store_time(store)
+ order by storname
+</select>
+
+<select id="qzquerytimeinfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap">
+select s.storname,
+       cp.corpname,
+       t.carcode,
+       ca.custname,
+       h.vbillcode,
+       b.vsourcebillcode,
+       sum(b.nshouldoutnum) sout,
+       sum(b.noutnum) rout,
+       t.waitdate,
+       t.startdate,
+       case
+         when length(t.startdate) > 10 then
+          ceil((to_date(t.startdate, 'yyyy-mm-dd hh24:mi:ss') -
+          to_date(t.waitdate, 'yyyy-mm-dd hh24:mi:ss')) * 24 * 60 * 60)
+         else
+          0
+       end waits,
+       t.enddate,
+       case
+         when (length(t.startdate) > 10 and length(t.enddate) > 10) then
+          ceil((to_date(t.enddate, 'yyyy-mm-dd hh24:mi:ss') -
+          to_date(t.startdate, 'yyyy-mm-dd hh24:mi:ss')) * 24 * 60 * 60)
+         else
+          0
+       end ups,
+       t.planenddate,
+       case
+         when (length(t.enddate) > 10) then
+          ceil((to_date(t.enddate, 'yyyy-mm-dd hh24:mi:ss') -
+          to_date(t.planenddate, 'yyyy-mm-dd hh24:mi:ss')) * 24 * 60 * 60)
+         else
+         0
+       end exs
+  from cartest         t,
+       ic_general_h_nc h,
+       bd_cumandoc_nc  c,
+       bd_cubasdoc_nc  ca,
+       ic_general_b_nc b,
+       bd_stordoc_nc   s,
+       carcorp cp
+ where b.dr = 0
+   and t.pk_nc_out = h.cgeneralhid
+   and h.ccustomerid = c.pk_cumandoc
+   and c.pk_cubasdoc = ca.pk_cubasdoc
+   and h.cgeneralhid = b.cgeneralhid
+   and t.store = s.pk_stordoc
+   and substr(t.carcode,1,1)=cp.corpcode
+   <dynamic>
+	  <isNotEmpty property="form_ptype" prepend="AND">
+			ca.custname like '$form_custname$%'
+	  </isNotEmpty>
+
+	  <isNotEmpty property="form_storecode" prepend="AND">
+            s.storcode = #form_storecode#
+	  </isNotEmpty>
+
+	  <isNotEmpty property="form_storecode" prepend="AND">
+            cp.corpcode = #form_corpcode#
+	  </isNotEmpty>
+
+	  
+ </dynamic>
+ group by s.storname,cp.corpname,
+          ca.custname,
+          h.vbillcode,
+          b.vsourcebillcode,
+          t.carcode,
+          t.waitdate,
+          t.startdate,
+          t.enddate,
+          t.planenddate,
+          length(t.enddate)
+</select>
+
+<select id="querycorp"   resultClass="java.util.HashMap">
+   select t.corpcode,t.corpname from carcorp t
+</select>
+<select id="querystock"   resultClass="java.util.HashMap">
+   select pk_scode,sname from tstock t
+</select>
+
+</sqlMap>
+
+

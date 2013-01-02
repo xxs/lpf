@@ -4,6 +4,6 @@
         <wb-resource deploy-path="/" source-path="/WebRoot"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
         <property name="context-root" value="/synearlpf"/>
-        <property name="java-output-path" value="/synearlpf/WebRoot/WEB-INF/classes"/>
+        <property name="java-output-path" value="/lpf/WebRoot/src"/>
     </wb-module>
 </project-modules>
