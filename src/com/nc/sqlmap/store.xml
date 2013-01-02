@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="salreport">
+<select id="selectsotemistake" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+select * from 
+(
+select 
+ distinct CBILLCODE,a.carbillhid  ,carcode,carnum,team,HOUTDATE
+ from 
+(select h.CBILLCODE, REPLACE(h.houtdate,'-','')||b.carcode||b.carnum||h.team carbillhid
+,b.vbatchcode,b.outcount,b.carcode,b.carnum,h.team,h.HOUTDATE
+from outstorebill_h h, outstorebill_b b  where h.cbillcode = b.cbillcode
+	<dynamic>
+		<isNotEmpty property="startdata" prepend="AND">
+					<![CDATA[
+						h.HOUTDATE >= #startdata#
+					]]>
+		</isNotEmpty>
+		<isNotEmpty property="enddata" prepend="AND">
+					<![CDATA[
+						h.HOUTDATE <= #enddata#
+					]]>
+		</isNotEmpty>
+			
+</dynamic>
+) a
+,
+(select in_h.csourcebillhid carbillhid ,in_b.vbatchcode ,in_b.ninnum from in_general_h in_h,in_general_b in_b 
+where in_h.cgeneralhid=in_b.cgeneralhid) c
+
+where a.carbillhid = c.carbillhid 
+
+)
+</select>
+
+<select id="sotemistake" parameterClass="java.util.Map" resultClass="int">
+select sum(ninnum-outcount) mistake from (
+select  0 outcount,in_b.ninnum  
+from in_general_h in_h,in_general_b in_b  where in_h.cgeneralhid=in_b.cgeneralhid  
+and  in_h.csourcebillhid=#carbillhid#
+union all  
+select b.outcount,0 from outstorebill_h h, outstorebill_b b  
+where h.cbillcode = b.cbillcode 
+and REPLACE(h.houtdate,'-','')||b.carcode||b.carnum||h.team =#carbillhid#
+)a 
+</select>
+
+
+<select id="delatilsotemistake" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+select
+ VBATCHCODE,invname,sum(outcount) outcount,sum(ninnum) ninnum,sum(ninnum-outcount) mistake
+from  (
+select 
+VBATCHCODE,
+(select p.invname from bd_invbasdoc p where  p.invcode = substr(VBATCHCODE,0,6)) invname
+,a.outcount,a.ninnum
+from (select in_h.csourcebillhid carbillhid ,in_b.vbatchcode ,0 outcount,in_b.ninnum
+ from in_general_h in_h,in_general_b in_b 
+where in_h.cgeneralhid=in_b.cgeneralhid  and  in_h.csourcebillhid=#carbillhid#
+union all 
+select REPLACE(h.houtdate,'-','')||b.carcode||b.carnum||h.team carbillhid
+,b.vbatchcode,b.outcount,0
+from outstorebill_h h, outstorebill_b b  where h.cbillcode = b.cbillcode
+and REPLACE(h.houtdate,'-','')||b.carcode||b.carnum||h.team =#carbillhid#) a
+)
+group by invname,VBATCHCODE
+</select>
+
+<insert id="insertMitake" parameterClass="java.util.HashMap" >
+insert  into outstorebill_b (CBILLCODE,VBATCHCODE,OUTCOUNT,OUTDATE,CARCODE,CARNUM,SIGN) 
+ values (#CBILLCODE#,#VBATCHCODE#,#OUTCOUNT#,#OUTDATE#,#CARCODE#,#CARNUM#,'1')
+</insert>
+
+<select id="selectGoodsteam" resultClass="java.util.HashMap">
+select trim(t.corpcode) corpcode,t.corpname from carcorp t
+</select>
+
+<update id="addCarword" parameterClass="java.util.Map">
+insert into carwork (PK_NC_ORDER,CORPCODE,CARCODE,REQUIREDATE,ORDERCODE ) 
+values(#PK_NC_ORDER#,#CORPCODE#,#CARCODE#,#REQUIREDATE#,#ORDERCODE# )
+</update>
+
+<update id="updateCarword" parameterClass="java.util.Map">
+  update set carwork
+   <dynamic> 
+           <isNotEmpty property="PK_NC_ORDER" > 
+              PK_NC_ORDER = #PK_NC_ORDER#
+            </isNotEmpty>
+             <isNotEmpty property="CORPCODE" > 
+               CORPCODE = #CORPCODE#
+            </isNotEmpty>
+              <isNotEmpty property="CARCODE" > 
+               CARCODE=#CARCODE#
+            </isNotEmpty>
+               <isNotEmpty property="REQUIREDATE" > 
+               REQUIREDATE = #REQUIREDATE#
+            </isNotEmpty>
+                 <isNotEmpty property="ORDERCODE" > 
+                 ORDERCODE = #ORDERCODE#
+            </isNotEmpty>
+             where rowidtochar(rowid) = #ID#
+   </dynamic>        
+     
+</update>
+
+<update id="delCarword" parameterClass="java.util.Map">
+        delete from   carwork    where rowidtochar(rowid) = #delid#
+</update>
+
+<select id="getCarworkPage" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	   select * from ( select row_.*, rownum rownum_ from (
+          select rowidtochar(rowid) as id,PK_NC_ORDER,trim(CORPCODE) CORPCODE,CARCODE,REQUIREDATE,ORDERCODE from carwork t
+       ) row_ where rownum &lt;= #limit#)  where rownum_ &gt; #start#
+</select>
+
+<select id="getCarworkTotalCount"  parameterClass="java.util.Map"  resultClass="int">
+     select count(*) from carwork t
+</select>
+
+<select id="getorderid"  parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+select * from(
+select distinct b.csourcebillhid,b.vsourcebillcode,ca.custname
+  from ic_general_h_nc t, ic_general_b_nc b,bd_cubasdoc_nc ca,bd_cumandoc_nc c
+ where t.cgeneralhid = b.cgeneralhid and t.ccustomerid=c.pk_cumandoc and c.pk_cubasdoc=ca.pk_cubasdoc
+   and t.cbilltypecode = '4C'
+   and t.dr = 0
+   and t.fbillflag = 2
+   and t.pk_corp = 1001
+   union all
+select distinct b.csourcebillhid,b.vsourcebillcode,s.bodyname
+  from ic_general_h_nc t, ic_general_b_nc b,bd_calbody_nc s
+ where t.cgeneralhid = b.cgeneralhid and t.cothercalbodyid=s.pk_calbody
+   and t.cbilltypecode = '4Y'
+   and t.dr = 0
+   and t.fbillflag = 2
+   and t.pk_corp = 1001   
+   ) ss where csourcebillhid not in (select pk_nc_order from carwork)
+</select>
+
+</sqlMap>
