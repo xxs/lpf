@@ -16,18 +16,30 @@ public class DayZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 	public DayZLNCtoBQSenderBySoPreorder() {
 		System.out.println("预订单主表增量数 无参构造函数");
 	}
-
-	/**
-	 * 自动执行的run方法
-	 */
 	public void run() {
-		try {
-			DeleteDate();//清空ods表数据
-			NCtoBQ();//数据抽取
-			System.out.println("预订单主表增量数据抽取完成");
-		} catch (Exception e) {
-			System.out.println("预订单主表抽取增量数据异常");
-			e.printStackTrace();
+		long lastTime = (new Date()).getTime();
+		long k;
+		while (true) {
+			k = (new Date()).getTime() - lastTime;
+			if (k < -1000l) {
+				lastTime = (new Date()).getTime();
+				continue;
+			}
+			if (k > (long) this.getNexttime()) {
+				try {
+					DeleteDate();//清空ods表数据
+					NCtoBQ();//数据抽取
+					System.out.println("预订单主表增量数据抽取完成");
+				} catch (Exception e) {
+					System.out.println("预订单主表抽取增量数据异常");
+					e.printStackTrace();
+				}
+				lastTime = (new Date()).getTime();
+			}
+			try {
+				// Thread.sleep(500000L);
+			} catch (Exception e) {
+			}
 		}
 	}
 	/**
@@ -120,7 +132,7 @@ public class DayZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 			sql.append("	and substr(p.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
 			sql.append("	and p.dr=0");
 			
-			System.out.println("查询sql:"+sql);
+			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
@@ -200,7 +212,7 @@ public class DayZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 					}
 					insetSql.append(")");
 					if(tm==0){
-						System.out.println(insetSql);
+						//System.out.println(insetSql);
 					}
 					try {
 						//执行存入增量数据

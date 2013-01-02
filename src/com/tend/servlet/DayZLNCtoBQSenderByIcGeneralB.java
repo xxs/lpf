@@ -21,6 +21,9 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 * 自动执行的run方法
 	 */
 	public void run() {
+		System.out.println("父类中的数据:"+this.getDays());
+		System.out.println("父类中的数据:"+this.getNexttime());
+		System.out.println("父类中的数据:"+this.getBeforedays());
 		long lastTime = (new Date()).getTime();
 		long k;
 		while (true) {
@@ -45,7 +48,6 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			} catch (Exception e) {
 			}
 		}
-		
 	}
 	/**
 	 * 清空表数据
@@ -258,7 +260,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  from ic_general_b gb         ");
 			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
 			sql.append("  where gh.dbilldate>=to_char((sysdate - ").append(this.getDays()+"),'yyyy-mm-dd')");
-			sql.append("  substr(gh.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
+			sql.append("  and substr(gh.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
 			sql.append("  and gh.dr=0                  ");
 			sql.append("  and gh.pk_corp != '1020'     ");
 			sql.append("  and gh.pk_corp != '1021'     ");
@@ -266,7 +268,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  and gh.pk_corp != '1024'     ");
 			sql.append("  and gh.pk_corp != '1032'     )");
 			
-			System.out.println("查询sql:"+sql);
+			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
@@ -469,7 +471,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 					}
 					insetSql.append(")");
 					if(tm==0){
-						System.out.println(insetSql);
+						//System.out.println(insetSql);
 					}
 					try {
 						//执行存入数据

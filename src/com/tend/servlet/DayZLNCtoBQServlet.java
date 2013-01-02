@@ -2,14 +2,17 @@ package com.tend.servlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+
 /**
  * NCtoBQ增量数据抽取
+ * 
  * @author xxs
- *
+ * 
  */
 public class DayZLNCtoBQServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	BaseDao baseDao ;
 	private DayZLNCtoBQSenderBySoSale soSale;
 	private DayZLNCtoBQSenderBySoSaleorderB soSaleorderB;
 	private DayZLNCtoBQSenderBySoApply soApply;
@@ -34,6 +37,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	private Thread TicGeneralH;
 	private Thread Twastagebill;
 	private Thread TwastagebillB;
+
 	public DayZLNCtoBQServlet() {
 	}
 
@@ -94,8 +98,22 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		wastagebill = new DayZLNCtoBQSenderByIcWastagebill();
 		wastagebillB = new DayZLNCtoBQSenderByIcWastagebillB();
 		System.out.println("程序初始化！");
+		/*
+		ServletConfig config = getServletConfig();
+		System.out.println(config.getInitParameter("nexttime"));
+		System.out.println(config.getInitParameter("beforedays"));
+		System.out.println(config.getInitParameter("days"));
+		if (config.getInitParameter("nexttime") != null
+				&& config.getInitParameter("beforedays") != null
+				&& config.getInitParameter("days") != null) {
+			baseDao = new BaseDao(Integer.parseInt(config
+					.getInitParameter("nexttime")), Integer.parseInt(config
+					.getInitParameter("beforedays")), Integer.parseInt(config
+					.getInitParameter("days")));
+		}
+		*/
 		System.out.println("抽取增量NC数据到BQ数据仓库启动线程！");
-		
+
 		TsoSale = new Thread(soSale);
 		TsoSaleorderB = new Thread(soSaleorderB);
 		TsoApply = new Thread(soApply);
@@ -108,7 +126,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		TicGeneralH = new Thread(icGeneralH);
 		Twastagebill = new Thread(wastagebill);
 		TwastagebillB = new Thread(wastagebillB);
-		
+
 		TsoSale.start();
 		TsoSaleorderB.start();
 		TsoApply.start();

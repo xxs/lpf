@@ -7,34 +7,35 @@ import java.sql.ResultSet;
 
 
 public class BaseDao {
-	private Integer nexttime;
-	private Integer days;
-	private Integer beforedays;
+	public Integer nexttime = 120000;
+	public Integer days = 60;
+	public Integer beforedays = 1;
 	
-	public Integer getDays() {
-		return days;
+	
+	public BaseDao() {
+		super();
 	}
 
-	public void setDays(Integer days) {
-		this.days = days;
+	public BaseDao(Integer n,Integer d,Integer b ) {
+		super();
+		nexttime = n;
+		days = d;
+		beforedays = b;
+		
 	}
-
-
+	
 	public Integer getNexttime() {
 		return nexttime;
 	}
 
-	public void setNexttime(Integer nexttime) {
-		this.nexttime = nexttime;
+	public Integer getDays() {
+		return days;
 	}
 
 	public Integer getBeforedays() {
 		return beforedays;
 	}
 
-	public void setBeforedays(Integer beforedays) {
-		this.beforedays = beforedays;
-	}
 	//获取NC数据库连接
 	public Connection getConForNC(){
 		Connection con = null;

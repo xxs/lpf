@@ -16,18 +16,30 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable
 	public DayZLNCtoBQSenderBySoSaleorderB() {
 		System.out.println("订单辅表数据增量抽取--无参构造函数");
 	}
-
-	/**
-	 * 自动执行的run方法
-	 */
 	public void run() {
-		try {
-			DeleteDate();//清空ods表数据
-			NCtoBQ();//数据抽取
-			System.out.println("订单辅表数据增量抽取完成");
-		} catch (Exception e) {
-			System.out.println("订单辅表抽取数据异常");
-			e.printStackTrace();
+		long lastTime = (new Date()).getTime();
+		long k;
+		while (true) {
+			k = (new Date()).getTime() - lastTime;
+			if (k < -1000l) {
+				lastTime = (new Date()).getTime();
+				continue;
+			}
+			if (k > (long) this.getNexttime()) {
+				try {
+					DeleteDate();//清空ods表数据
+					NCtoBQ();//数据抽取
+					System.out.println("订单辅表数据增量抽取完成");
+				} catch (Exception e) {
+					System.out.println("订单辅表抽取数据异常");
+					e.printStackTrace();
+				}
+				lastTime = (new Date()).getTime();
+			}
+			try {
+				// Thread.sleep(500000L);
+			} catch (Exception e) {
+			}
 		}
 	}
 	/**
@@ -172,7 +184,7 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable
 			sql.append("  and s.pk_corp != '1024'");
 			sql.append("  and s.pk_corp != '1032' )");
 			
-			System.out.println("查询sql:"+sql);
+			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
@@ -298,7 +310,7 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable
 					}
 					insetSql.append(")");
 					if(tm==0){
-						System.out.println(insetSql);
+						//System.out.println(insetSql);
 					}
 					try {
 						//执行存入数据
