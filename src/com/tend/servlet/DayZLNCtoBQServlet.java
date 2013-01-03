@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 public class DayZLNCtoBQServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	BaseDao baseDao ;
+	//BaseDao baseDao ;
 	private DayZLNCtoBQSenderBySoSale soSale;
 	private DayZLNCtoBQSenderBySoSaleorderB soSaleorderB;
 	private DayZLNCtoBQSenderBySoApply soApply;

@@ -17,9 +17,6 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnabl
 		System.out.println("途损单主表增量数据抽取--无参构造函数");
 	}
 	public void run() {
-		System.out.println("父类中的数据:"+this.getDays());
-		System.out.println("父类中的数据:"+this.getNexttime());
-		System.out.println("父类中的数据:"+this.getBeforedays());
 		long lastTime = (new Date()).getTime();
 		long k;
 		while (true) {

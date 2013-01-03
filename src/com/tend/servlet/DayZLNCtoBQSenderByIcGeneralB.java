@@ -21,9 +21,6 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 * 自动执行的run方法
 	 */
 	public void run() {
-		System.out.println("父类中的数据:"+this.getDays());
-		System.out.println("父类中的数据:"+this.getNexttime());
-		System.out.println("父类中的数据:"+this.getBeforedays());
 		long lastTime = (new Date()).getTime();
 		long k;
 		while (true) {

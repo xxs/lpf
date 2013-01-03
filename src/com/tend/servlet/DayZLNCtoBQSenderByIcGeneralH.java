@@ -17,9 +17,6 @@ public class DayZLNCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 		System.out.println("出入库单主表增量数据抽取--无参构造函数");
 	}
 	public void run() {
-		System.out.println("父类中的数据:"+this.getDays());
-		System.out.println("父类中的数据:"+this.getNexttime());
-		System.out.println("父类中的数据:"+this.getBeforedays());
 		long lastTime = (new Date()).getTime();
 		long k;
 		while (true) {
