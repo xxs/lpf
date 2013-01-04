@@ -6,55 +6,45 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
+
 /**
  * 退货申请单辅表增量数据抽取
+ * 
  * @author Administrator
- *
+ * 
  */
 public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 
 	public DayZLNCtoBQSenderBySoApplyB() {
 		System.out.println("退货申请单辅表增量数据抽取--无参构造函数");
 	}
+
 	public void run() {
-		long lastTime = (new Date()).getTime();
-		long k;
-		while (true) {
-			k = (new Date()).getTime() - lastTime;
-			if (k < -1000l) {
-				lastTime = (new Date()).getTime();
-				continue;
-			}
-			if (k > (long) this.getNexttime()) {
-				try {
-					DeleteDate();//清空ods表数据
-					NCtoBQ();//数据抽取
-					System.out.println("退货申请单辅表增量数据抽取完成");
-				} catch (Exception e) {
-					System.out.println("退货申请单辅表抽取数据异常");
-					e.printStackTrace();
-				}
-				lastTime = (new Date()).getTime();
-			}
-			try {
-				// Thread.sleep(500000L);
-			} catch (Exception e) {
-			}
+		try {
+			DeleteDate();// 清空ods表数据
+			NCtoBQ();// 数据抽取
+			System.out.println("退货申请单辅表增量数据抽取完成");
+		} catch (Exception e) {
+			System.out.println("退货申请单辅表抽取数据异常");
+			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * 清空表数据
+	 * 
 	 * @throws Exception
 	 */
 	public void DeleteDate() throws Exception {
 		String sql = "delete ods_so_apply_b";
 		boolean result = this.excuteDelete(sql);
-		if(!result){
+		if (!result) {
 			System.out.println("操作成功");
-		}else{
+		} else {
 			System.out.println("操作失败");
 		}
 	}
+
 	/**
 	 * 抽取数据
 	 * 
@@ -68,7 +58,7 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("退货申请单辅取数据表抽................");
-		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
+		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("退货申请单辅表获取连接");
 			conNC = this.getConForNC();
@@ -200,8 +190,10 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  from so_apply_b ayb");
 			sql.append("  where ayb.dr=0 and ayb.pk_apply in (select ay.pk_apply");
 			sql.append("  from so_apply ay");
-			sql.append("  where ay.dbilldate >=to_char((sysdate - ").append(this.getDays()+"),'yyyy-mm-dd')");
-			sql.append("  and substr(ay.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
+			sql.append("  where ay.dbilldate >=to_char((sysdate - ").append(
+					this.getDays() + "),'yyyy-mm-dd')");
+			sql.append("  and substr(ay.ts,1,10)=to_char((sysdate - ").append(
+					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");
 			sql.append("  and ay.pk_corp != '1021'");
@@ -209,13 +201,13 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  and ay.pk_corp != '1024'");
 			sql.append("  and ay.pk_corp != '1032' )");
 
-			//System.out.println("查询sql:"+sql);
+			// System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
 			int resultcount = rsmd.getColumnCount();
 			int tm = 0;
-			while(restNC.next()){
+			while (restNC.next()) {
 				StringBuilder insetSql = new StringBuilder();
 				insetSql.append("insert into ODS_SO_APPLY_B ( ");
 				insetSql.append("  BCONFIRM                ,");
@@ -339,59 +331,62 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 				insetSql.append("  VRETURNMODE             ,");
 				insetSql.append("  VSERIALCODE             ,");
 				insetSql.append("  VSOURCECODE          ) values ( ");
-					for (int i = 1; i <= resultcount; i++) {
-						
-						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
-							if(null == restNC.getString(i) || restNC.getString(i).isEmpty()){
-								insetSql.append("''");
-							}else{
-								insetSql.append("'").append(restNC.getString(i)).append("'");
-							}
-							if(i<resultcount){
-								insetSql.append(",");
-							}
-						}else{
-							insetSql.append(restNC.getInt(i));
-							if(i<resultcount){
-								insetSql.append(",");
-							}
+				for (int i = 1; i <= resultcount; i++) {
+
+					if (rsmd.getColumnType(i) == 1
+							|| rsmd.getColumnType(i) == 12) {
+						if (null == restNC.getString(i)
+								|| restNC.getString(i).isEmpty()) {
+							insetSql.append("''");
+						} else {
+							insetSql.append("'").append(restNC.getString(i))
+									.append("'");
+						}
+						if (i < resultcount) {
+							insetSql.append(",");
+						}
+					} else {
+						insetSql.append(restNC.getInt(i));
+						if (i < resultcount) {
+							insetSql.append(",");
 						}
 					}
-					insetSql.append(")");
-					if(tm==0){
-						//System.out.println(insetSql);
+				}
+				insetSql.append(")");
+				if (tm == 0) {
+					// System.out.println(insetSql);
+				}
+				try {
+					// 执行存入数据
+					pstBQ = conBQ.prepareStatement(insetSql.toString());
+					boolean result = pstBQ.execute();
+					if (!result) {
+						System.out.println("第" + tm + "条B保存成功");
+					} else {
+						System.out.println("第" + tm + "条B保存失败");
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
 					try {
-						//执行存入数据
-						pstBQ = conBQ.prepareStatement(insetSql.toString());
-						boolean result = pstBQ.execute();
-						if(!result){
-							System.out.println("第"+tm+"条B保存成功");
-						}else{
-							System.out.println("第"+tm+"条B保存失败");
+						if (pstBQ != null) {
+							pstBQ.close();
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}finally {
-						try{
-							if(pstBQ!=null){
-								pstBQ.close();
-							}
-						}catch(Exception e){
-							e.printStackTrace();
-						}
 					}
-					tm++;
-			 }                                                         
+				}
+				tm++;
+			}
 			System.out.println("退货申请单辅表增量数据抽取完毕");
-			System.out.println("结束时间为"+new Timestamp(new Date().getTime()));
+			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			System.out.println("退货申请单辅表NC connection close");
 			BaseDao.closeAll(pstNC, restNC, conNC);
 			System.out.println("退货申请单辅表NC connection closed");
-			
+
 			System.out.println("退货申请单辅表BQ connection close");
 			BaseDao.closeAll(pstBQ, restBQ, conBQ);
 			System.out.println("退货申请单辅表BQ connection closed");

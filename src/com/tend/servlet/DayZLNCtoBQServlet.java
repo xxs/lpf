@@ -1,5 +1,8 @@
 package com.tend.servlet;
 
+import java.util.Date;
+
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -98,8 +101,11 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		wastagebill = new DayZLNCtoBQSenderByIcWastagebill();
 		wastagebillB = new DayZLNCtoBQSenderByIcWastagebillB();
 		System.out.println("程序初始化！");
-		/*
+		
 		ServletConfig config = getServletConfig();
+		int nexttime = Integer.parseInt(config.getInitParameter("nexttime"));
+		System.out.println("nexttime:"+nexttime);
+		/*
 		System.out.println(config.getInitParameter("nexttime"));
 		System.out.println(config.getInitParameter("beforedays"));
 		System.out.println(config.getInitParameter("days"));
@@ -112,8 +118,6 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 					.getInitParameter("days")));
 		}
 		*/
-		System.out.println("抽取增量NC数据到BQ数据仓库启动线程！");
-
 		TsoSale = new Thread(soSale);
 		TsoSaleorderB = new Thread(soSaleorderB);
 		TsoApply = new Thread(soApply);
@@ -126,19 +130,90 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		TicGeneralH = new Thread(icGeneralH);
 		Twastagebill = new Thread(wastagebill);
 		TwastagebillB = new Thread(wastagebillB);
-
-		TsoSale.start();
-		TsoSaleorderB.start();
-		TsoApply.start();
-		TsoApplyB.start();
-		TsoPreorder.start();
-		TsoPreorderB.start();
-		TsoSaleinvoice.start();
-		TsoSaleinvoiceB.start();
-		TicGeneralB.start();
-		TicGeneralH.start();
-		Twastagebill.start();
-		TwastagebillB.start();
-		System.out.println("抽取增量NC数据到BQ数据仓库启动线程成功！");
+		
+		long lastTime = (new Date()).getTime();
+		long k;
+		while (true) {
+			k = (new Date()).getTime() - lastTime;
+			if (k < -1000l) {
+				lastTime = (new Date()).getTime();
+				continue;
+			}
+			if (k > (long) nexttime) {
+				try {
+					System.out.println("抽取增量NC数据到BQ数据仓库启动线程！");
+					System.out.println(TsoSale.isAlive());
+					System.out.println(TsoSaleorderB.isAlive());
+					System.out.println(TsoApply.isAlive());
+					System.out.println(TsoApplyB.isAlive());
+					System.out.println(TsoPreorder.isAlive());
+					System.out.println(TsoPreorderB.isAlive());
+					System.out.println(TsoSaleinvoice.isAlive());
+					System.out.println(TsoSaleinvoiceB.isAlive());
+					System.out.println(TicGeneralB.isAlive());
+					System.out.println(TicGeneralH.isAlive());
+					System.out.println(Twastagebill.isAlive());
+					System.out.println(TwastagebillB.isAlive());
+					
+					if(!TsoSale.isAlive()){
+						TsoSale = new Thread(soSale);
+						TsoSale.start();
+					}
+					if (!TsoSaleorderB.isAlive()){
+						TsoSaleorderB = new Thread(soSaleorderB);
+						TsoSaleorderB.start();
+					}
+					if (!TsoApply.isAlive()){
+						TsoApply = new Thread(soApply);
+						TsoApply.start();
+					}
+					if (!TsoApplyB.isAlive()){
+						TsoApplyB = new Thread(soApplyB);
+						TsoApplyB.start();
+					}
+					if (!TsoPreorder.isAlive()){
+						TsoPreorder = new Thread(soPreorder);
+						TsoPreorder.start();
+					}
+					if (!TsoPreorderB.isAlive()){
+						TsoPreorderB = new Thread(soPreorderB);
+						TsoPreorderB.start();
+					}
+					if (!TsoSaleinvoice.isAlive()){
+						TsoSaleinvoice = new Thread(soSaleinvoice);
+						TsoSaleinvoice.start();
+					}
+					if (!TsoSaleinvoiceB.isAlive()){
+						TsoSaleinvoiceB = new Thread(soSaleinvoiceB);
+						TsoSaleinvoiceB.start();
+					}
+					if (!TicGeneralB.isAlive()){
+						TicGeneralB = new Thread(icGeneralB);
+						TicGeneralB.start();
+					}
+					if (!TicGeneralH.isAlive()){
+						TicGeneralH = new Thread(icGeneralH);
+						TicGeneralH.start();
+					}
+					if (!Twastagebill.isAlive()){
+						Twastagebill = new Thread(wastagebill);
+						Twastagebill.start();
+					}
+					if (!TwastagebillB.isAlive()){
+						TwastagebillB = new Thread(wastagebillB);
+						TwastagebillB.start();
+					}
+					System.out.println("线程启动成功");
+				} catch (Exception e) {
+					System.out.println("线程启动异常");
+					e.printStackTrace();
+				}
+				lastTime = (new Date()).getTime();
+			}
+			try {
+				// Thread.sleep(500000L);
+			} catch (Exception e) {
+		}
+	}
 	}
 }

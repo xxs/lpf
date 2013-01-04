@@ -17,15 +17,6 @@ public class DayZLNCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnab
 		System.out.println("发票辅表增量数据抽取--无参构造函数");
 	}
 	public void run() {
-		long lastTime = (new Date()).getTime();
-		long k;
-		while (true) {
-			k = (new Date()).getTime() - lastTime;
-			if (k < -1000l) {
-				lastTime = (new Date()).getTime();
-				continue;
-			}
-			if (k > (long) this.getNexttime()) {
 				try {
 					DeleteDate();//清空ods表数据
 					NCtoBQ();//数据抽取
@@ -34,13 +25,6 @@ public class DayZLNCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnab
 					System.out.println("发票辅表抽取增量数据异常");
 					e.printStackTrace();
 				}
-				lastTime = (new Date()).getTime();
-			}
-			try {
-				// Thread.sleep(500000L);
-			} catch (Exception e) {
-			}
-		}
 	}
 	/**
 	 * 清空表数据

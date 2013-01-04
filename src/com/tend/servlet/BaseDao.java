@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 
 
 public class BaseDao {
-	public Integer nexttime = 120000;
+	//public Integer nexttime = 120000;
 	public Integer days = 60;
 	public Integer beforedays = 1;
 	
@@ -18,15 +18,15 @@ public class BaseDao {
 
 	public BaseDao(Integer n,Integer d,Integer b ) {
 		super();
-		nexttime = n;
+		//nexttime = n;
 		days = d;
 		beforedays = b;
 		
 	}
 	
-	public Integer getNexttime() {
-		return nexttime;
-	}
+//	public Integer getNexttime() {
+//		return nexttime;
+//	}
 
 	public Integer getDays() {
 		return days;

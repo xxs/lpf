@@ -6,55 +6,46 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
+
 /**
  * 途损单主表增量数据抽取
+ * 
  * @author Administrator
- *
+ * 
  */
-public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
+public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements
+		Runnable {
 
 	public DayZLNCtoBQSenderByIcWastagebill() {
 		System.out.println("途损单主表增量数据抽取--无参构造函数");
 	}
+
 	public void run() {
-		long lastTime = (new Date()).getTime();
-		long k;
-		while (true) {
-			k = (new Date()).getTime() - lastTime;
-			if (k < -1000l) {
-				lastTime = (new Date()).getTime();
-				continue;
-			}
-			if (k > (long) this.getNexttime()) {
-				try {
-					DeleteDate();//清空ods表数据
-					NCtoBQ();//数据抽取
-					System.out.println("途损单主表增量数据抽取完成");
-				} catch (Exception e) {
-					System.out.println("途损单主表抽取数据异常");
-					e.printStackTrace();
-				}
-				lastTime = (new Date()).getTime();
-			}
-			try {
-				// Thread.sleep(500000L);
-			} catch (Exception e) {
-			}
+		try {
+			DeleteDate();// 清空ods表数据
+			NCtoBQ();// 数据抽取
+			System.out.println("途损单主表增量数据抽取完成");
+		} catch (Exception e) {
+			System.out.println("途损单主表抽取数据异常");
+			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * 清空表数据
+	 * 
 	 * @throws Exception
 	 */
 	public void DeleteDate() throws Exception {
 		String sql = "delete ods_ic_wastagebill";
 		boolean result = this.excuteDelete(sql);
-		if(!result){
+		if (!result) {
 			System.out.println("操作成功");
-		}else{
+		} else {
 			System.out.println("操作失败");
 		}
 	}
+
 	/**
 	 * 抽取数据
 	 * 
@@ -68,7 +59,7 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnabl
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("途损单辅取数据表抽................");
-		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
+		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("途损单主表获取连接");
 			conNC = this.getConForNC();
@@ -133,8 +124,10 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnabl
 			sql.append("  VDEF9             ,");
 			sql.append("  VMEMO                                    ");
 			sql.append("  from ic_wastagebill w");
-			sql.append("  where w.dbilldate >=to_char((sysdate - ").append(this.getDays()+"),'yyyy-mm-dd')");
-			sql.append("  and substr(w.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
+			sql.append("  where w.dbilldate >=to_char((sysdate - ").append(
+					this.getDays() + "),'yyyy-mm-dd')");
+			sql.append("  and substr(w.ts,1,10)=to_char((sysdate - ").append(
+					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
@@ -142,15 +135,15 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnabl
 			sql.append("  and w.pk_corp != '1024'");
 			sql.append("  and w.pk_corp != '1032'");
 
-			//System.out.println("查询sql:"+sql);
+			// System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
 			int resultcount = rsmd.getColumnCount();
 			int tm = 0;
-			while(restNC.next()){
+			while (restNC.next()) {
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into ODS_IC_WASTAGEBILL (  ");  
+				insetSql.append("insert into ODS_IC_WASTAGEBILL (  ");
 				insetSql.append("  CAPPROVERID       ,");
 				insetSql.append("  CBILLTYPECODE     ,");
 				insetSql.append("  CCALBODYID        ,");
@@ -207,59 +200,62 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnabl
 				insetSql.append("  VDEF8             ,");
 				insetSql.append("  VDEF9             ,");
 				insetSql.append("  VMEMO     ) values (        ");
-					for (int i = 1; i <= resultcount; i++) {
-						
-						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
-							if(null == restNC.getString(i) || restNC.getString(i).isEmpty()){
-								insetSql.append("''");
-							}else{
-								insetSql.append("'").append(restNC.getString(i)).append("'");
-							}
-							if(i<resultcount){
-								insetSql.append(",");
-							}
-						}else{
-							insetSql.append(restNC.getInt(i));
-							if(i<resultcount){
-								insetSql.append(",");
-							}
+				for (int i = 1; i <= resultcount; i++) {
+
+					if (rsmd.getColumnType(i) == 1
+							|| rsmd.getColumnType(i) == 12) {
+						if (null == restNC.getString(i)
+								|| restNC.getString(i).isEmpty()) {
+							insetSql.append("''");
+						} else {
+							insetSql.append("'").append(restNC.getString(i))
+									.append("'");
+						}
+						if (i < resultcount) {
+							insetSql.append(",");
+						}
+					} else {
+						insetSql.append(restNC.getInt(i));
+						if (i < resultcount) {
+							insetSql.append(",");
 						}
 					}
-					insetSql.append(")");
-					if(tm==0){
-						//System.out.println(insetSql);
+				}
+				insetSql.append(")");
+				if (tm == 0) {
+					// System.out.println(insetSql);
+				}
+				try {
+					// 执行存入数据
+					pstBQ = conBQ.prepareStatement(insetSql.toString());
+					boolean result = pstBQ.execute();
+					if (!result) {
+						System.out.println("第" + tm + "条H保存成功");
+					} else {
+						System.out.println("第" + tm + "条H保存失败");
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
 					try {
-						//执行存入数据
-						pstBQ = conBQ.prepareStatement(insetSql.toString());
-						boolean result = pstBQ.execute();
-						if(!result){
-							System.out.println("第"+tm+"条H保存成功");
-						}else{
-							System.out.println("第"+tm+"条H保存失败");
+						if (pstBQ != null) {
+							pstBQ.close();
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}finally {
-						try{
-							if(pstBQ!=null){
-								pstBQ.close();
-							}
-						}catch(Exception e){
-							e.printStackTrace();
-						}
 					}
-					tm++;
-			 }                                                         
+				}
+				tm++;
+			}
 			System.out.println("途损单主表增量数据抽取完毕");
-			System.out.println("结束时间为"+new Timestamp(new Date().getTime()));
+			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			System.out.println("途损单主表NC connection close");
 			BaseDao.closeAll(pstNC, restNC, conNC);
 			System.out.println("途损单主表NC connection closed");
-			
+
 			System.out.println("途损单主表BQ connection close");
 			BaseDao.closeAll(pstBQ, restBQ, conBQ);
 			System.out.println("途损单主表BQ connection closed");

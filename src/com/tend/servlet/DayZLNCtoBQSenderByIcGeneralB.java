@@ -6,10 +6,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
+
 /**
  * 出入库单辅表增量数据抽取
+ * 
  * @author Administrator
- *
+ * 
  */
 public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 
@@ -21,47 +23,34 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 * 自动执行的run方法
 	 */
 	public void run() {
-		long lastTime = (new Date()).getTime();
-		long k;
-		while (true) {
-			k = (new Date()).getTime() - lastTime;
-			if (k < -1000l) {
-				lastTime = (new Date()).getTime();
-				continue;
-			}
-			if (k > (long) this.getNexttime()) {
-				try {
-					DeleteDate();//清空ods表数据
-					NCtoBQ();//数据抽取
-					System.out.println("出入库单辅表增量数据抽取完成");
-				} catch (Exception e) {
-					System.out.println("出入库单辅表抽取数据异常");
-					e.printStackTrace();
-				}
-				lastTime = (new Date()).getTime();
-			}
-			try {
-				// Thread.sleep(500000L);
-			} catch (Exception e) {
-			}
+		try {
+			DeleteDate();// 清空ods表数据
+			NCtoBQ();// 数据抽取
+			System.out.println("出入库单辅表增量数据抽取完成");
+		} catch (Exception e) {
+			System.out.println("出入库单辅表抽取数据异常");
+			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * 清空表数据
+	 * 
 	 * @throws Exception
 	 */
 	public void DeleteDate() throws Exception {
 		String sql = "delete ods_ic_general_b";
 		boolean result = this.excuteDelete(sql);
-		if(!result){
+		if (!result) {
 			System.out.println("操作成功");
-		}else{
+		} else {
 			System.out.println("操作失败");
 		}
 	}
+
 	/**
-	 * 检测动态的天数
-	 * 天数和轮询的天数在web.xml中配置
+	 * 检测动态的天数 天数和轮询的天数在web.xml中配置
+	 * 
 	 * @throws Exception
 	 */
 	public void NCtoBQ() throws Exception {
@@ -72,7 +61,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("出入库单辅取数据表抽................");
-		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
+		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("出入库单辅表获取连接");
 			conNC = this.getConForNC();
@@ -153,7 +142,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  IDESATYPE           ,");
 			sql.append("  ISOK                ,");
 			sql.append("  NACCUMTONUM         ,");
-			sql.append("  NACCUMWASTNUM       ,");  
+			sql.append("  NACCUMWASTNUM       ,");
 			sql.append("  NBARCODENUM         ,");
 			sql.append("  NCORRESPONDASTNUM   ,");
 			sql.append("  NCORRESPONDGRSNUM   ,");
@@ -230,7 +219,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  VSOURCEROWNO        ,");
 			sql.append("  VSOURCEWASTCODE     ,");
 			sql.append("  VSOURCEWASTROWNO    ,");
-			sql.append("  VSRC2BILLCODE       ,");  
+			sql.append("  VSRC2BILLCODE       ,");
 			sql.append("  VSRC2BILLROWNO      ,");
 			sql.append("  VTRANSFERCODE       ,");
 			sql.append("  VUSERDEF1           ,");
@@ -249,29 +238,31 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  VUSERDEF3           ,");
 			sql.append("  VUSERDEF4           ,");
 			sql.append("  VUSERDEF5           ,");
-			sql.append("  VUSERDEF6           ,");  
+			sql.append("  VUSERDEF6           ,");
 			sql.append("  VUSERDEF7           ,");
 			sql.append("  VUSERDEF8           ,");
 			sql.append("  VUSERDEF9           ,");
 			sql.append("  VVEHICLECODE        ");
 			sql.append("  from ic_general_b gb         ");
 			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
-			sql.append("  where gh.dbilldate>=to_char((sysdate - ").append(this.getDays()+"),'yyyy-mm-dd')");
-			sql.append("  and substr(gh.ts,1,10)=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
+			sql.append("  where gh.dbilldate>=to_char((sysdate - ").append(
+					this.getDays() + "),'yyyy-mm-dd')");
+			sql.append("  and substr(gh.ts,1,10)=to_char((sysdate - ").append(
+					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and gh.dr=0                  ");
 			sql.append("  and gh.pk_corp != '1020'     ");
 			sql.append("  and gh.pk_corp != '1021'     ");
 			sql.append("  and gh.pk_corp != '1023'     ");
 			sql.append("  and gh.pk_corp != '1024'     ");
 			sql.append("  and gh.pk_corp != '1032'     )");
-			
-			//System.out.println("查询sql:"+sql);
+
+			// System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
 			int resultcount = rsmd.getColumnCount();
 			int tm = 0;
-			while(restNC.next()){
+			while (restNC.next()) {
 				StringBuilder insetSql = new StringBuilder();
 				insetSql.append("insert into ODS_IC_GENERAL_B (");
 				insetSql.append("  BBARCODECLOSE       ,");
@@ -347,7 +338,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 				insetSql.append("  IDESATYPE           ,");
 				insetSql.append("  ISOK                ,");
 				insetSql.append("  NACCUMTONUM         ,");
-				insetSql.append("  NACCUMWASTNUM       ,");  
+				insetSql.append("  NACCUMWASTNUM       ,");
 				insetSql.append("  NBARCODENUM         ,");
 				insetSql.append("  NCORRESPONDASTNUM   ,");
 				insetSql.append("  NCORRESPONDGRSNUM   ,");
@@ -424,7 +415,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 				insetSql.append("  VSOURCEROWNO        ,");
 				insetSql.append("  VSOURCEWASTCODE     ,");
 				insetSql.append("  VSOURCEWASTROWNO    ,");
-				insetSql.append("  VSRC2BILLCODE       ,");  
+				insetSql.append("  VSRC2BILLCODE       ,");
 				insetSql.append("  VSRC2BILLROWNO      ,");
 				insetSql.append("  VTRANSFERCODE       ,");
 				insetSql.append("  VUSERDEF1           ,");
@@ -443,64 +434,67 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 				insetSql.append("  VUSERDEF3           ,");
 				insetSql.append("  VUSERDEF4           ,");
 				insetSql.append("  VUSERDEF5           ,");
-				insetSql.append("  VUSERDEF6           ,");  
+				insetSql.append("  VUSERDEF6           ,");
 				insetSql.append("  VUSERDEF7           ,");
 				insetSql.append("  VUSERDEF8           ,");
 				insetSql.append("  VUSERDEF9           ,");
 				insetSql.append("  VVEHICLECODE       ) values ( ");
-					for (int i = 1; i <= resultcount; i++) {
-						
-						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
-							if(null == restNC.getString(i) || restNC.getString(i).isEmpty()){
-								insetSql.append("''");
-							}else{
-								insetSql.append("'").append(restNC.getString(i)).append("'");
-							}
-							if(i<resultcount){
-								insetSql.append(",");
-							}
-						}else{
-							insetSql.append(restNC.getInt(i));
-							if(i<resultcount){
-								insetSql.append(",");
-							}
+				for (int i = 1; i <= resultcount; i++) {
+
+					if (rsmd.getColumnType(i) == 1
+							|| rsmd.getColumnType(i) == 12) {
+						if (null == restNC.getString(i)
+								|| restNC.getString(i).isEmpty()) {
+							insetSql.append("''");
+						} else {
+							insetSql.append("'").append(restNC.getString(i))
+									.append("'");
+						}
+						if (i < resultcount) {
+							insetSql.append(",");
+						}
+					} else {
+						insetSql.append(restNC.getInt(i));
+						if (i < resultcount) {
+							insetSql.append(",");
 						}
 					}
-					insetSql.append(")");
-					if(tm==0){
-						//System.out.println(insetSql);
+				}
+				insetSql.append(")");
+				if (tm == 0) {
+					// System.out.println(insetSql);
+				}
+				try {
+					// 执行存入数据
+					pstBQ = conBQ.prepareStatement(insetSql.toString());
+					boolean result = pstBQ.execute();
+					if (!result) {
+						System.out.println("第" + tm + "条B保存成功");
+					} else {
+						System.out.println("第" + tm + "条B保存失败");
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
 					try {
-						//执行存入数据
-						pstBQ = conBQ.prepareStatement(insetSql.toString());
-						boolean result = pstBQ.execute();
-						if(!result){
-							System.out.println("第"+tm+"条B保存成功");
-						}else{
-							System.out.println("第"+tm+"条B保存失败");
+						if (pstBQ != null) {
+							pstBQ.close();
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
-					}finally {
-						try{
-							if(pstBQ!=null){
-								pstBQ.close();
-							}
-						}catch(Exception e){
-							e.printStackTrace();
-						}
 					}
-					tm++;
-			 }                                                         
+				}
+				tm++;
+			}
 			System.out.println("出入库单辅表增量数据抽取完毕");
-			System.out.println("结束时间为"+new Timestamp(new Date().getTime()));
+			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			System.out.println("出入库单辅表NC connection close");
 			BaseDao.closeAll(pstNC, restNC, conNC);
 			System.out.println("出入库单辅表NC connection closed");
-			
+
 			System.out.println("出入库单辅表BQ connection close");
 			BaseDao.closeAll(pstBQ, restBQ, conBQ);
 			System.out.println("出入库单辅表BQ connection closed");
