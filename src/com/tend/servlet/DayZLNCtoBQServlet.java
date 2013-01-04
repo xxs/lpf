@@ -1,8 +1,10 @@
 package com.tend.servlet;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -22,7 +24,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	private DayZLNCtoBQSenderBySoApplyB soApplyB;
 	private DayZLNCtoBQSenderBySoPreorder soPreorder;
 	private DayZLNCtoBQSenderBySoPreorderB soPreorderB;
-	private DayZLNCtoBQSenderBySoSaleinvoice soSaleinvoice;
+	private DayZLNCtoBQSenderBySoSaleinvoice soSaleinvoice; 
 	private DayZLNCtoBQSenderBySoSaleinvoiceB soSaleinvoiceB;
 	private DayZLNCtoBQSenderByIcGeneralB icGeneralB;
 	private DayZLNCtoBQSenderByIcGeneralH icGeneralH;
@@ -39,7 +41,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	private Thread TicGeneralB;
 	private Thread TicGeneralH;
 	private Thread Twastagebill;
-	private Thread TwastagebillB;
+	private Thread TwastagebillB; 
 
 	public DayZLNCtoBQServlet() {
 	}
@@ -48,7 +50,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		// sender.stop();
 		try {
 			TsoSale.join(1000L);
-			TsoSaleorderB.join(1000L);
+			TsoSaleorderB.join(1000L); 
 			TsoApply.join(1000L);
 			TsoApplyB.join(1000L);
 			TsoPreorder.join(1000L);
@@ -101,23 +103,6 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		wastagebill = new DayZLNCtoBQSenderByIcWastagebill();
 		wastagebillB = new DayZLNCtoBQSenderByIcWastagebillB();
 		System.out.println("程序初始化！");
-		
-		ServletConfig config = getServletConfig();
-		int nexttime = Integer.parseInt(config.getInitParameter("nexttime"));
-		System.out.println("nexttime:"+nexttime);
-		/*
-		System.out.println(config.getInitParameter("nexttime"));
-		System.out.println(config.getInitParameter("beforedays"));
-		System.out.println(config.getInitParameter("days"));
-		if (config.getInitParameter("nexttime") != null
-				&& config.getInitParameter("beforedays") != null
-				&& config.getInitParameter("days") != null) {
-			baseDao = new BaseDao(Integer.parseInt(config
-					.getInitParameter("nexttime")), Integer.parseInt(config
-					.getInitParameter("beforedays")), Integer.parseInt(config
-					.getInitParameter("days")));
-		}
-		*/
 		TsoSale = new Thread(soSale);
 		TsoSaleorderB = new Thread(soSaleorderB);
 		TsoApply = new Thread(soApply);
@@ -131,17 +116,16 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		Twastagebill = new Thread(wastagebill);
 		TwastagebillB = new Thread(wastagebillB);
 		
-		long lastTime = (new Date()).getTime();
-		long k;
-		while (true) {
-			k = (new Date()).getTime() - lastTime;
-			if (k < -1000l) {
-				lastTime = (new Date()).getTime();
-				continue;
-			}
-			if (k > (long) nexttime) {
-				try {
-					System.out.println("抽取增量NC数据到BQ数据仓库启动线程！");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 1); // 控制时      12
+        calendar.set(Calendar.MINUTE, 0);       // 控制分   0
+        calendar.set(Calendar.SECOND, 0);       // 控制秒      0
+        Date time = calendar.getTime();         // 得出执行任务的时间,此处为今天的12：00：00
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+            	try {
+					System.out.println("抽取增量NC数据到BQ数据仓库启动线程！"); 
 					System.out.println(TsoSale.isAlive());
 					System.out.println(TsoSaleorderB.isAlive());
 					System.out.println(TsoApply.isAlive());
@@ -187,7 +171,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 						TsoSaleinvoiceB = new Thread(soSaleinvoiceB);
 						TsoSaleinvoiceB.start();
 					}
-					if (!TicGeneralB.isAlive()){
+					if (!TicGeneralB.isAlive()){ 
 						TicGeneralB = new Thread(icGeneralB);
 						TicGeneralB.start();
 					}
@@ -208,12 +192,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 					System.out.println("线程启动异常");
 					e.printStackTrace();
 				}
-				lastTime = (new Date()).getTime();
-			}
-			try {
-				// Thread.sleep(500000L);
-			} catch (Exception e) {
-		}
-	}
+            }
+        }, time, 1000 * 60 * 60 * 24);// 这里设定将延时每天固定执行
 	}
 }
