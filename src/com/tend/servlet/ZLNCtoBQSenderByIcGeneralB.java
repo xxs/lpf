@@ -23,7 +23,7 @@ public class ZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-01","2013-01-04",1);
+			DateLoop("2012-10-15", "2013-01-04","2013-01-07",1);
 			System.out.println("出入库单辅表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("出入库单辅表抽取数据异常");

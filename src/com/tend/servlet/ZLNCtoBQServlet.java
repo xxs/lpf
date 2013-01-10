@@ -110,7 +110,7 @@ public class ZLNCtoBQServlet extends HttpServlet {
 		TwastagebillB = new Thread(wastagebillB);
 		
 		TsoSale.start();
-		TsoSaleorderB.start();
+		TsoSaleorderB.start(); 
 		TsoApply.start();
 		TsoApplyB.start();
 		TsoPreorder.start();
