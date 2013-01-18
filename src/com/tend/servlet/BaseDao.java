@@ -49,6 +49,20 @@ public class BaseDao {
 		}
 		return con;
 	}
+	//获取NC测试数据库连接
+	public Connection getConForNCTest(){
+		System.out.println("启动测试库连接");
+		Connection con = null;
+		String dirver = "oracle.jdbc.driver.OracleDriver";
+		String url = "jdbc:oracle:thin:@100.100.1.71:1521:nctp";
+		try{
+			Class.forName(dirver);
+			con = DriverManager.getConnection(url,"snzs02","snzs02");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return con;
+	}
 	//获取BQ数据库连接
 	public Connection getConForBQ(){
 		Connection con = null;
