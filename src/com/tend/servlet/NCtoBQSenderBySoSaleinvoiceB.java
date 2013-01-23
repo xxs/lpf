@@ -19,7 +19,7 @@ public class NCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2012-11-28",5);
+			DateLoop("2010-07-01", "2012-11-01",3);
 			System.out.println("发票辅表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票辅表抽取数据异常");
@@ -149,14 +149,15 @@ public class NCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable {
 			sql.append("  PK_CORP                 ,");
 			sql.append("  TS                       ");
 			sql.append("  from so_saleinvoice_b svb");
-			sql.append("  where svb.ts >= '").append(beginDate+"'");
-			sql.append("  and svb.ts <= '").append(endDate+"'");
-			sql.append("  and svb.dr=0");
-			sql.append("  and svb.pk_corp != '1020'");
-			sql.append("  and svb.pk_corp != '1021'");
-			sql.append("  and svb.pk_corp != '1023'");
-			sql.append("  and svb.pk_corp != '1024'");
-			sql.append("  and svb.pk_corp != '1032'");
+			sql.append("  where svb.dr=0 and svb.csaleid in (select sv.csaleid from so_saleinvoice sv ");
+			sql.append("  where sv.ts >= '").append(beginDate+"'");
+			sql.append("  and sv.ts <= '").append(endDate+"'");
+			sql.append("  and sv.dr=0");
+			sql.append("  and sv.pk_corp != '1020'");
+			sql.append("  and sv.pk_corp != '1021'");
+			sql.append("  and sv.pk_corp != '1023'");
+			sql.append("  and sv.pk_corp != '1024'");
+			sql.append("  and sv.pk_corp != '1032' )");
 			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
@@ -256,7 +257,7 @@ public class NCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable {
 								insetSql.append(",");
 							}
 						}else{
-							insetSql.append(restNC.getInt(i));
+							insetSql.append(restNC.getDouble(i));
 							if(i<resultcount){
 								insetSql.append(",");
 							}

@@ -19,7 +19,7 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2012-11-28",5);
+			DateLoop("2010-07-01", "2012-11-01",5);
 			System.out.println("发票主表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票主表抽取数据异常");
@@ -242,7 +242,7 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 								insetSql.append(",");
 							}
 						}else{
-							insetSql.append(restNC.getInt(i));
+							insetSql.append(restNC.getDouble(i));
 							if(i<resultcount){
 								insetSql.append(",");
 							}

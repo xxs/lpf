@@ -12,9 +12,9 @@ import java.util.Date;
  * @author xxs
  *
  */
-public class DjzbNCtoBQSender extends BaseDao implements Runnable {
+public class NCtoBQSenderByArapDjzb extends BaseDao implements Runnable {
 
-	public DjzbNCtoBQSender() {
+	public NCtoBQSenderByArapDjzb() {
 		System.out.println("单据主表增量数 无参构造函数");
 	}
 
@@ -23,7 +23,7 @@ public class DjzbNCtoBQSender extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-01",5);
+			DateLoop("2010-07-01", "2012-11-01",5);
 			System.out.println("单据主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("单据主表抽取增量数据异常");

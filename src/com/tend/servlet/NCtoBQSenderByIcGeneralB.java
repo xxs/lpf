@@ -19,7 +19,7 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-01", "2012-11-29",5);
+			DateLoop("2010-07-01", "2012-11-01",3);
 			System.out.println("出入库单辅表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("出入库单辅表抽取数据异常");
@@ -245,14 +245,15 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  VUSERDEF9           ,");
 			sql.append("  VVEHICLECODE        ");
 			sql.append("  from ic_general_b gb         ");
-			sql.append("  where gb.ts >= '").append(beginDate+"'");
-			sql.append("  and gb.ts <= '").append(endDate+"'");
-			sql.append("  and gb.dr=0                  ");
-			sql.append("  and gb.pk_corp != '1020'     ");
-			sql.append("  and gb.pk_corp != '1021'     ");
-			sql.append("  and gb.pk_corp != '1023'     ");
-			sql.append("  and gb.pk_corp != '1024'     ");
-			sql.append("  and gb.pk_corp != '1032'     ");
+			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
+			sql.append("  where gh.ts >= '").append(beginDate+"'");
+			sql.append("  and gh.ts <= '").append(endDate+"'");
+			sql.append("  and gh.dr=0                  ");
+			sql.append("  and gh.pk_corp != '1020'     ");
+			sql.append("  and gh.pk_corp != '1021'     ");
+			sql.append("  and gh.pk_corp != '1023'     ");
+			sql.append("  and gh.pk_corp != '1024'     ");
+			sql.append("  and gh.pk_corp != '1032'     )");
 			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
@@ -448,7 +449,7 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 								insetSql.append(",");
 							}
 						}else{
-							insetSql.append(restNC.getInt(i));
+							insetSql.append(restNC.getDouble(i));
 							if(i<resultcount){
 								insetSql.append(",");
 							}

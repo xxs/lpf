@@ -19,7 +19,7 @@ public class NCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2012-11-28",5);
+			DateLoop("2010-07-01", "2012-11-01",3);
 			System.out.println("订单辅表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("订单辅表抽取数据异常");
@@ -168,14 +168,15 @@ public class NCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 			sql.append("  VEDITREASON             ,");
 			sql.append("  VRECEIVEADDRESS           ");
 			sql.append("  from so_saleorder_b sb");
-			sql.append("  where sb.ts >= '").append(beginDate+"'");
-			sql.append("  and sb.ts <= '").append(endDate+"'");
-			sql.append("  and sb.dr=0");
-			sql.append("  and sb.pk_corp != '1020'");
-			sql.append("  and sb.pk_corp != '1021'");
-			sql.append("  and sb.pk_corp != '1023'");
-			sql.append("  and sb.pk_corp != '1024'");
-			sql.append("  and sb.pk_corp != '1032'");
+			sql.append("  where sb.dr=0 and sb.csaleid in (select s.csaleid from so_sale s ");
+			sql.append("  where s.ts >= '").append(beginDate+"'");
+			sql.append("  and s.ts <= '").append(endDate+"'");
+			sql.append("  and s.dr=0");
+			sql.append("  and s.pk_corp != '1020'");
+			sql.append("  and s.pk_corp != '1021'");
+			sql.append("  and s.pk_corp != '1023'");
+			sql.append("  and s.pk_corp != '1024'");
+			sql.append("  and s.pk_corp != '1032' )");
 			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
@@ -294,7 +295,7 @@ public class NCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 								insetSql.append(",");
 							}
 						}else{
-							insetSql.append(restNC.getInt(i));
+							insetSql.append(restNC.getDouble(i));
 							if(i<resultcount){
 								insetSql.append(",");
 							}

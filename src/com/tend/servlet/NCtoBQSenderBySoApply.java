@@ -12,9 +12,9 @@ import java.util.Date;
  * @author Administrator
  *
  */
-public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
+public class NCtoBQSenderBySoApply extends BaseDao implements Runnable {
 
-	public ZLNCtoBQSenderBySoApply() {
+	public NCtoBQSenderBySoApply() {
 		System.out.println("退货申请单主表增量数据抽取--无参构造函数");
 	}
 
@@ -23,7 +23,7 @@ public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-04","2013-01-07",2);
+			DateLoop("2010-07-01", "2012-11-01",5);
 			System.out.println("退货申请单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("退货申请单主表抽取数据异常");
@@ -34,22 +34,22 @@ public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 	 * 循环调用的方法
 	 * @throws Exception 
 	 */
-	public void DateLoop(String dbilldate,String begindate,String enddate,int days) throws Exception{
+	public void DateLoop(String begindate,String enddate,int days) throws Exception{
 		FormatDate mm = new FormatDate();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date date1 = sdf.parse(begindate);
 		Date date2 = sdf.parse(enddate);
 		Date datetemp = mm.getDateAfterDay(date1, days);
-		System.out.println("退货申请单主表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
-		NCtoBQ(dbilldate,sdf.format(date1), sdf.format(datetemp));
+		System.out.println("发票主表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
+		NCtoBQ(sdf.format(date1), sdf.format(datetemp));
 		while(mm.dateCompare(datetemp , date2)){
 			datetemp = mm.getDateAfterDay(datetemp, days);
 			if(mm.dateCompare(date2  ,datetemp )){
-				System.out.println("退货申请单主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(date2));
-				NCtoBQ(dbilldate,sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(date2));
+				System.out.println("发票主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(date2));
+				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(date2));
 			}else{
-				System.out.println("退货申请单主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(datetemp));
-				NCtoBQ(dbilldate,sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(datetemp));
+				System.out.println("发票主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(datetemp));
+				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(datetemp));
 			}
 		}
 	}
@@ -58,7 +58,7 @@ public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 	 * 
 	 * @throws Exception
 	 */
-	public void NCtoBQ(String dbilldate,String ts,String ts2) throws Exception {
+	public void NCtoBQ(String beginDate,String endDate) throws Exception {
 		Connection conNC = null;
 		PreparedStatement pstNC = null;
 		ResultSet restNC = null;
@@ -129,9 +129,8 @@ public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 			sql.append("  VRECEIPTCODE    ,");
 			sql.append("  VSOURCECODE                            ");
 			sql.append("  from so_apply ay");
-			sql.append("  where ay.dbilldate >= '").append(dbilldate+"'");
-			sql.append("  and ay.ts >= '").append(ts+"'");
-			sql.append("  and ay.ts <= '").append(ts2+"'");
+			sql.append("  where ay.ts >= '").append(beginDate+"'");
+			sql.append("  and ay.ts <= '").append(endDate+"'");
 			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");
 			sql.append("  and ay.pk_corp != '1021'");
@@ -147,7 +146,7 @@ public class ZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into ODS_SO_APPLY ( ");
+				insetSql.append("insert into DWT_SO_APPLY ( ");
 				insetSql.append("  BBILLFINISH     ,");
 				insetSql.append("  BCHECKBILL      ,");
 				insetSql.append("  BDELIVER        ,");

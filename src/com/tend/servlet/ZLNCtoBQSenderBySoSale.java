@@ -257,7 +257,6 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  BISSEND        ) values (    ");
 					for (int i = 1; i <= resultcount; i++) {
-						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
 							if(null == restNC.getString(i) || restNC.getString(i).isEmpty()){
 								insetSql.append("''");
@@ -268,7 +267,7 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 								insetSql.append(",");
 							}
 						}else{
-							insetSql.append(restNC.getInt(i));
+							insetSql.append(restNC.getDouble(i));
 							if(i<resultcount){
 								insetSql.append(",");
 							}

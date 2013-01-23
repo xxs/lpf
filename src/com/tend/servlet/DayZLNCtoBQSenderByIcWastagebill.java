@@ -215,7 +215,7 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements
 							insetSql.append(",");
 						}
 					} else {
-						insetSql.append(restNC.getInt(i));
+						insetSql.append(restNC.getDouble(i));
 						if (i < resultcount) {
 							insetSql.append(",");
 						}
