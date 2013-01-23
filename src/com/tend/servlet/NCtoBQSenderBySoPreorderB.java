@@ -40,15 +40,15 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 		Date date1 = sdf.parse(begindate);
 		Date date2 = sdf.parse(enddate);
 		Date datetemp = mm.getDateAfterDay(date1, days);
-		System.out.println("单据辅表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
+		System.out.println("预订单辅表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
 		NCtoBQ(sdf.format(date1), sdf.format(datetemp));
 		while(mm.dateCompare(datetemp , date2)){
 			datetemp = mm.getDateAfterDay(datetemp, days);
 			if(mm.dateCompare(date2  ,datetemp )){
-				System.out.println("单据辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(date2));
+				System.out.println("预订单辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(date2));
 				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(date2));
 			}else{
-				System.out.println("单据辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(datetemp));
+				System.out.println("预订单辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(datetemp));
 				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(datetemp));
 			}
 		}
@@ -69,7 +69,7 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("预订单辅表获取连接");
-			conNC = this.getConForNC();
+			conNC = this.getConForNCTest();
 			conBQ = this.getConForBQ();
 			System.out.println("预订单辅表获取连接成功");
 			StringBuilder sql = new StringBuilder();
@@ -185,7 +185,7 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 			sql.append("  and p.ts <= '").append(endDate+"'");
 			sql.append("  and p.dr=0 ) ");
 			
-			System.out.println("查询sql:"+sql);
+//			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
@@ -318,7 +318,7 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 					}
 					insetSql.append(")");
 					if(tm==0){
-						System.out.println(insetSql);
+//						System.out.println(insetSql);
 					}
 					try {
 						//执行存入增量数据

@@ -65,7 +65,7 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("发票主表获取连接");
-			conNC = this.getConForNC();
+			conNC = this.getConForNCTest();
 			conBQ = this.getConForBQ();
 			System.out.println("发票主表获取连接成功");
 			StringBuilder sql = new StringBuilder();
