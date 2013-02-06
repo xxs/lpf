@@ -19,7 +19,7 @@ public class NCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2010-07-01", "2012-11-01",3);
+			DateLoop("2012-11-01", "2013-01-28",1);
 			System.out.println("发票辅表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票辅表抽取数据异常");
@@ -65,7 +65,7 @@ public class NCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable {
 		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("发票辅表获取连接");
-			conNC = this.getConForNCTest();
+			conNC = this.getConForNC();
 			conBQ = this.getConForBQ();
 			System.out.println("发票辅表获取连接成功");
 			StringBuilder sql = new StringBuilder();

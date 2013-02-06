@@ -11,7 +11,7 @@ public class DBOracleconn {
 	static Statement stmt = null;
 	static ResultSet rs = null;
     public static Connection getDBConn() {
-    	String url="jdbc:oracle:thin:@100.100.1.77:1523:testdb";
+    	String url="jdbc:oracle:thin:@100.100.1.71:1521:nctp";
     	//String url="jdbc:oracle:thin:@100.100.1.11:1521:sndb";
         String user = "ben01";
         String password = "benben";
