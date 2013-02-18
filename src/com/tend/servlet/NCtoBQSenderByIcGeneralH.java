@@ -19,7 +19,7 @@ public class NCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",3);
+			DateLoop("2013-02-16", "2013-02-18",3);
 			System.out.println("出入库单主表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("出入库单主表抽取数据异常");
@@ -143,11 +143,11 @@ public class NCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 			sql.append("		  VUSERDEF6         ,           ");
 			sql.append("		  VUSERDEF7         ,           ");
 			sql.append("		  VUSERDEF8         ,           ");
-			sql.append("		  VUSERDEF9                     ");
+			sql.append("		  VUSERDEF9         ,            ");
+			sql.append("		  DR                     ");
 			sql.append("		  from ic_general_h gh          ");
 			sql.append("		  where gh.ts >= '").append(beginDate+"'");
 			sql.append("		  and gh.ts <= '").append(endDate+"'");
-			sql.append("		  and gh.dr=0                    ");
 			sql.append("		  and gh.pk_corp != '1020'       ");
 			sql.append("		  and gh.pk_corp != '1021'       ");
 			sql.append("		  and gh.pk_corp != '1023'       ");
@@ -161,7 +161,7 @@ public class NCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 			
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_IC_GENERAL_H (BASSETCARD        ,");
+				insetSql.append("insert into ODS_IC_GENERAL_H (BASSETCARD        ,");
 				insetSql.append("	  BDELIVEDTORM      ,                        ");
 				insetSql.append("	  BDIRECTTRANFLAG   ,                        ");
 				insetSql.append("	  BOUTRETFLAG       ,                        ");
@@ -234,7 +234,8 @@ public class NCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 				insetSql.append("	  VUSERDEF6         ,                        ");
 				insetSql.append("	  VUSERDEF7         ,                        ");
 				insetSql.append("	  VUSERDEF8         ,                        ");
-				insetSql.append("	  VUSERDEF9          ) values (              ");
+				insetSql.append("	  VUSERDEF9         ,              ");
+				insetSql.append("	  DR          ) values (              ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

@@ -23,7 +23,7 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",1);
+			DateLoop("2013-02-16", "2013-02-18",1);
 			System.out.println("预订单辅表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("预订单辅表抽取增量数据异常");
@@ -177,13 +177,13 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 			sql.append("  VPRICECALPROC      ,");
 			sql.append("  VRECEIVEADDRESS    ,");
 			sql.append("  VRETURNMODE        ,");
-			sql.append("  VSOURCECODE        ");
+			sql.append("  VSOURCECODE        ,");
+			sql.append("  DR        ");
 			sql.append("  FROM  so_preorder_b pb");
-			sql.append("  where pb.dr=0 and pb.pk_preorder in (select p.pk_preorder");
+			sql.append("  where pb.pk_preorder in (select p.pk_preorder");
 			sql.append("  from so_preorder p");
 			sql.append("  where p.ts>= '").append(beginDate+"'");
-			sql.append("  and p.ts <= '").append(endDate+"'");
-			sql.append("  and p.dr=0 ) ");
+			sql.append("  and p.ts <= '").append(endDate+"' )");
 			
 //			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
@@ -193,7 +193,7 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_SO_PREORDER_B ( ");   
+				insetSql.append("insert into ODS_SO_PREORDER_B ( ");   
 				insetSql.append("  BLARGESSFLAG       ,");
 				insetSql.append("  BLINECLOSE         ,");
 				insetSql.append("  BRETURNPROFIT      ,");
@@ -297,7 +297,8 @@ public class NCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 				insetSql.append("  VPRICECALPROC      ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  VRETURNMODE        ,");
-				insetSql.append("  VSOURCECODE       ) values ( ");
+				insetSql.append("  VSOURCECODE       , ");
+				insetSql.append("  DR       ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

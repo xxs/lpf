@@ -23,7 +23,7 @@ public class NCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",1);
+			DateLoop("2013-02-16", "2013-02-18",1);
 			System.out.println("退货申请单辅表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("退货申请单辅表抽取数据异常");
@@ -194,13 +194,13 @@ public class NCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  VRECEIVEADDRESS         ,");
 			sql.append("  VRETURNMODE             ,");
 			sql.append("  VSERIALCODE             ,");
-			sql.append("  VSOURCECODE                                   ");
+			sql.append("  VSOURCECODE             ,");
+			sql.append("  DR                                   ");
 			sql.append("  from so_apply_b ayb");
-			sql.append("  where ayb.dr=0 and ayb.pk_apply in (select ay.pk_apply");
+			sql.append("  where ayb.pk_apply in (select ay.pk_apply");
 			sql.append("  from so_apply ay");
 			sql.append("  where ay.ts >= '").append(beginDate+"'");
 			sql.append("  and ay.ts <= '").append(endDate+"'");
-			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");
 			sql.append("  and ay.pk_corp != '1021'");
 			sql.append("  and ay.pk_corp != '1023'");
@@ -215,7 +215,7 @@ public class NCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_SO_APPLY_B ( ");
+				insetSql.append("insert into ODS_SO_APPLY_B ( ");
 				insetSql.append("  BCONFIRM                ,");
 				insetSql.append("  BDERICTTRANS            ,");
 				insetSql.append("  BIFINVFINISH            ,");
@@ -336,7 +336,8 @@ public class NCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIVEADDRESS         ,");
 				insetSql.append("  VRETURNMODE             ,");
 				insetSql.append("  VSERIALCODE             ,");
-				insetSql.append("  VSOURCECODE          ) values ( ");
+				insetSql.append("  VSOURCECODE          , ");
+				insetSql.append("  DR          ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

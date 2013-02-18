@@ -19,7 +19,7 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",3);
+			DateLoop("2013-02-16", "2013-02-18",3);
 			System.out.println("发票主表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票主表抽取数据异常");
@@ -140,11 +140,11 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 			sql.append("  VRECEIPTCODE       ,");
 			sql.append("  VRECEIVEADDRESS    ,");
 			sql.append("  BISSEND            ,");
-			sql.append("  NKPMNY                  ");
+			sql.append("  NKPMNY              ,");
+			sql.append("  DR                  ");
 			sql.append("  from so_saleinvoice sv");
 			sql.append("  where sv.ts >= '").append(beginDate+"'");
 			sql.append("  and sv.ts <= '").append(endDate+"'");
-			sql.append("  and sv.dr=0");
 			sql.append("  and sv.pk_corp != '1020'");
 			sql.append("  and sv.pk_corp != '1021'");
 			sql.append("  and sv.pk_corp != '1023'");
@@ -158,7 +158,7 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 			
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_SO_SALEINVOICE ( ");
+				insetSql.append("insert into ODS_SO_SALEINVOICE ( ");
 				insetSql.append("  BFREECUSTFLAG      ,");
 				insetSql.append("  BINITFLAG          ,");
 				insetSql.append("  BTOGOLDTAX         ,");
@@ -229,7 +229,8 @@ public class NCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  BISSEND            ,");
-				insetSql.append("  NKPMNY           ) values (       ");
+				insetSql.append("  NKPMNY           ,      ");
+				insetSql.append("  DR           ) values (       ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

@@ -19,7 +19,7 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",1);
+			DateLoop("2013-02-16", "2013-02-18",1);
 			System.out.println("出入库单辅表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("出入库单辅表抽取数据异常");
@@ -243,12 +243,12 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  VUSERDEF7           ,");
 			sql.append("  VUSERDEF8           ,");
 			sql.append("  VUSERDEF9           ,");
-			sql.append("  VVEHICLECODE        ");
+			sql.append("  VVEHICLECODE,        ");
+			sql.append("  DR        ");
 			sql.append("  from ic_general_b gb         ");
-			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
+			sql.append("  where gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
 			sql.append("  where gh.ts >= '").append(beginDate+"'");
 			sql.append("  and gh.ts <= '").append(endDate+"'");
-			sql.append("  and gh.dr=0                  ");
 			sql.append("  and gh.pk_corp != '1020'     ");
 			sql.append("  and gh.pk_corp != '1021'     ");
 			sql.append("  and gh.pk_corp != '1023'     ");
@@ -262,7 +262,7 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_IC_GENERAL_B (");
+				insetSql.append("insert into ODS_IC_GENERAL_B (");
 				insetSql.append("  BBARCODECLOSE       ,");
 				insetSql.append("  BONROADFLAG         ,");
 				insetSql.append("  BRETURNPROFIT       ,");
@@ -436,7 +436,8 @@ public class NCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 				insetSql.append("  VUSERDEF7           ,");
 				insetSql.append("  VUSERDEF8           ,");
 				insetSql.append("  VUSERDEF9           ,");
-				insetSql.append("  VVEHICLECODE       ) values ( ");
+				insetSql.append("  VVEHICLECODE, ");
+				insetSql.append("  DR       ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

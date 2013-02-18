@@ -141,7 +141,7 @@ public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 			sql.append("  from so_saleinvoice sv");
 			sql.append("  where sv.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(sv.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(sv.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and sv.dr=0");
 			sql.append("  and sv.pk_corp != '1020'");

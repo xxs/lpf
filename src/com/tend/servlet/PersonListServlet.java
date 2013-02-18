@@ -138,7 +138,7 @@ public class PersonListServlet extends HttpServlet {
 		conn = DBOracleconn.getDBConn();
 		stmt = conn.createStatement();
 		sql = "insert into XX_VSESSION (PK_VID, VNAME, VREMARK,VDATE,VDATESCOPE,VADDRESS,CREATEDATE,VSTATE,VMAKER)";
-        sql = sql + " values(XX_VSESSION_SEQ.nextval,'" + vname + "','" + vremark + "','" + vdate + "','" + vdatescope + "','" + vaddress + "',to_char(sysdate,'yyyy-mm-dd'),'申请中','"+vmaker+"')";
+        sql = sql + " values(XX_VSESSION_SEQ.nextval,'" + vname + "','" + vremark + "','" + vdate + "','" + vdatescope + "','" + vaddress + "',to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'申请','"+vmaker+"')";
         System.out.println(sql);
         Integer pk_vid = 0;
 		try {

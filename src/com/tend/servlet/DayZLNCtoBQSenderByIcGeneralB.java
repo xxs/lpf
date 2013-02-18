@@ -247,7 +247,7 @@ public class DayZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
 			sql.append("  where gh.dbilldate>=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(gh.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(gh.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and gh.dr=0                  ");
 			sql.append("  and gh.pk_corp != '1020'     ");

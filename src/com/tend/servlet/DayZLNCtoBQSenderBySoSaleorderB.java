@@ -168,7 +168,7 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements
 			sql.append("  where sb.dr=0 and sb.csaleid in (select s.csaleid from so_sale s ");
 			sql.append("  where s.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(s.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(s.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and s.dr=0");
 			sql.append("  and s.pk_corp != '1020'");

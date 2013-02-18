@@ -175,7 +175,7 @@ public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable 
 			sql.append("  from so_preorder p");
 			sql.append("  where p.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(p.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(p.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and p.dr=0 ) ");
 

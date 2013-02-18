@@ -23,7 +23,7 @@ public class NCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 	 */
 	public void run() {	
 		try {
-			DateLoop("2012-11-01", "2013-01-28",3);
+			DateLoop("2013-02-16", "2013-02-18",3);
 			System.out.println("途损单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("途损单主表抽取数据异常");
@@ -129,11 +129,11 @@ public class NCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 			sql.append("  VDEF7             ,");
 			sql.append("  VDEF8             ,");
 			sql.append("  VDEF9             ,");
-			sql.append("  VMEMO                                    ");
+			sql.append("  VMEMO             ,");
+			sql.append("  DR                ");
 			sql.append("  from ic_wastagebill w");
 			sql.append("  where w.ts >= '").append(beginDate+"'");
 			sql.append("  and w.ts <= '").append(endDate+"'");
-			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
 			sql.append("  and w.pk_corp != '1023'");
@@ -148,7 +148,7 @@ public class NCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_IC_WASTAGEBILL (  ");  
+				insetSql.append("insert into ODS_IC_WASTAGEBILL (  ");  
 				insetSql.append("  CAPPROVERID       ,");
 				insetSql.append("  CBILLTYPECODE     ,");
 				insetSql.append("  CCALBODYID        ,");
@@ -204,7 +204,8 @@ public class NCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 				insetSql.append("  VDEF7             ,");
 				insetSql.append("  VDEF8             ,");
 				insetSql.append("  VDEF9             ,");
-				insetSql.append("  VMEMO     ) values (        ");
+				insetSql.append("  VMEMO     ,     ");
+				insetSql.append("  DR     ) values (        ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

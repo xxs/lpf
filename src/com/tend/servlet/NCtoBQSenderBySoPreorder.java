@@ -23,7 +23,7 @@ public class NCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",3);
+			DateLoop("2013-02-16", "2013-02-18",3);
 			System.out.println("预订单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("预订单主表抽取增量数据异常");
@@ -125,11 +125,11 @@ public class NCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 			sql.append("  VDEF9,");
 			sql.append("  VNOTE,");
 			sql.append("  VRECEIPTCODE,");
-			sql.append("  VRECEIVEADDRESS");
+			sql.append("  VRECEIVEADDRESS,");
+			sql.append("  DR ");
 			sql.append("	from so_preorder p");
 			sql.append("	where p.ts >= '").append(beginDate+"'");
 			sql.append("	and p.ts <= '").append(endDate+"'");
-			sql.append("	and p.dr=0");
 			
 //			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
@@ -139,7 +139,7 @@ public class NCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_SO_PREORDER (");
+				insetSql.append("insert into ODS_SO_PREORDER (");
 				insetSql.append("  CAPPROVEID,");
 				insetSql.append("  CBIZTYPE,");
 				insetSql.append("  CCURRENCYTYPEID,");
@@ -190,7 +190,8 @@ public class NCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 				insetSql.append("  VDEF9,");
 				insetSql.append("  VNOTE,");
 				insetSql.append("  VRECEIPTCODE,");
-				insetSql.append("  VRECEIVEADDRESS ) values ( ");
+				insetSql.append("  VRECEIVEADDRESS , ");
+				insetSql.append("  DR ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

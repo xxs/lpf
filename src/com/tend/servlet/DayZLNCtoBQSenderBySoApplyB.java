@@ -192,7 +192,7 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  from so_apply ay");
 			sql.append("  where ay.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(ay.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(ay.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");

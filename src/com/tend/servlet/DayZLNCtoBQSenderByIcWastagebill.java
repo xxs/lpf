@@ -126,7 +126,7 @@ public class DayZLNCtoBQSenderByIcWastagebill extends BaseDao implements
 			sql.append("  from ic_wastagebill w");
 			sql.append("  where w.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
-			sql.append("  and substr(w.ts,1,10)=to_char((sysdate - ").append(
+			sql.append("  and substr(w.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
 			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");

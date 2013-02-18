@@ -23,7 +23,7 @@ public class NCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-11-01", "2013-01-28",1);
+			DateLoop("2013-02-16", "2013-02-18",1);
 			System.out.println("途损单辅表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("途损单辅表抽取数据异常");
@@ -192,13 +192,13 @@ public class NCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable {
 			sql.append("  VFREE5               ,");
 			sql.append("  VMEMO                ,");
 			sql.append("  VSOURCEBILLCODE      ,");
-			sql.append("  VSOURCEROWNO                              ");
+			sql.append("  VSOURCEROWNO,         ");
+			sql.append("  DR                              ");
 			sql.append("  from ic_wastagebill_b wb");
-			sql.append("  where wb.dr=0 and wb.cwastagebillid in (select w.cwastagebillid");
+			sql.append("  where wb.cwastagebillid in (select w.cwastagebillid");
 			sql.append("      from ic_wastagebill w");
 			sql.append("  where w.ts >= '").append(beginDate+"'");
 			sql.append("  and w.ts <= '").append(endDate+"'");
-			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
 			sql.append("  and w.pk_corp != '1023'");
@@ -213,7 +213,7 @@ public class NCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable {
 			int tm = 0;
 			while(restNC.next()){
 				StringBuilder insetSql = new StringBuilder();
-				insetSql.append("insert into DWT_IC_WASTAGEBILL_B (  ");
+				insetSql.append("insert into ODS_IC_WASTAGEBILL_B (  ");
 				insetSql.append("  CASTUNITID           ,");
 				insetSql.append("  CBILLCUSTBASID       ,");
 				insetSql.append("  CBILLCUSTOMERID      ,");
@@ -332,7 +332,8 @@ public class NCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable {
 				insetSql.append("  VFREE5               ,");
 				insetSql.append("  VMEMO                ,");
 				insetSql.append("  VSOURCEBILLCODE      ,");
-				insetSql.append("  VSOURCEROWNO      ) values (        ");
+				insetSql.append("  VSOURCEROWNO      ,       ");
+				insetSql.append("  DR      ) values (        ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
