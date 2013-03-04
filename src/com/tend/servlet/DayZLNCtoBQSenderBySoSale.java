@@ -146,13 +146,13 @@ public class DayZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 			sql.append("  VNOTE              ,");
 			sql.append("  VRECEIPTCODE       ,");
 			sql.append("  VRECEIVEADDRESS    ,");
-			sql.append("  BISSEND            ");
+			sql.append("  BISSEND            ,");
+			sql.append("  DR            ");
 			sql.append("  from so_sale s");
 			sql.append("  where s.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(s.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and s.dr=0		");
 			sql.append("  and s.pk_corp != '1020'	");
 			sql.append("  and s.pk_corp != '1021'	");
 			sql.append("  and s.pk_corp != '1023'	");
@@ -248,7 +248,8 @@ public class DayZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 				insetSql.append("  VNOTE              ,");
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
-				insetSql.append("  BISSEND        ) values (    ");
+				insetSql.append("  BISSEND        , ");
+				insetSql.append("  DR        ) values (    ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

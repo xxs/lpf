@@ -169,15 +169,16 @@ public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable 
 			sql.append("  VPRICECALPROC      ,");
 			sql.append("  VRECEIVEADDRESS    ,");
 			sql.append("  VRETURNMODE        ,");
-			sql.append("  VSOURCECODE        ");
+			sql.append("  VSOURCECODE        ,");
+			sql.append("  DR        ");
 			sql.append("  FROM  so_preorder_b pb");
-			sql.append("  where pb.dr=0 and pb.pk_preorder in (select p.pk_preorder");
+			sql.append("  where pb.pk_preorder in (select p.pk_preorder");
 			sql.append("  from so_preorder p");
 			sql.append("  where p.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(p.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and p.dr=0 ) ");
+			sql.append("  ) ");
 
 			// System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
@@ -291,7 +292,8 @@ public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable 
 				insetSql.append("  VPRICECALPROC      ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  VRETURNMODE        ,");
-				insetSql.append("  VSOURCECODE       ) values ( ");
+				insetSql.append("  VSOURCECODE       , ");
+				insetSql.append("  DR       ) values ( ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

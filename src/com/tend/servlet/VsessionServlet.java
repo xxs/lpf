@@ -52,6 +52,6 @@ public class VsessionServlet extends HttpServlet {
 					e.printStackTrace();
 				}
             }
-        },1000,30000);
+        },1000,1000*60*15);
 	}
 }

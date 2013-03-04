@@ -262,11 +262,11 @@ public class DayZLNCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 			sql.append("  where f.vouchid in (select z.vouchid from arap_djzb z ");
 			sql.append("  where z.djrq >=to_char((sysdate - ").append(this.getDays()+"),'yyyy-mm-dd')");
 			sql.append("  and substr(z.ts,1,10)>=to_char((sysdate - ").append(this.getBeforedays()+"),'yyyy-mm-dd')");
-			sql.append("  and z.pk_corp != '1020'");
-			sql.append("  and z.pk_corp != '1021'");
-			sql.append("  and z.pk_corp != '1023'");
-			sql.append("  and z.pk_corp != '1024'");
-			sql.append("  and z.pk_corp != '1032' )");
+			sql.append("  and z.dwbm != '1020'");
+			sql.append("  and z.dwbm != '1021'");
+			sql.append("  and z.dwbm != '1023'");
+			sql.append("  and z.dwbm != '1024'");
+			sql.append("  and z.dwbm != '1032' )");
 			
 			//System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
@@ -474,7 +474,7 @@ public class DayZLNCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 				insetSql.append("  ZYX7,");
 				insetSql.append("  ZYX8,");
 				insetSql.append("  ZYX9,");
-				insetSql.append("  DR ) values ( ");
+				insetSql.append("  DR ) values ( "); 
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

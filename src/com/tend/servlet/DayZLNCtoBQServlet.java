@@ -18,6 +18,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	//BaseDao baseDao ;
+	private DayZLNCtoBQSenderByArapDjzb arapDjzb;
+	private DayZLNCtoBQSenderByArapDjfb arapDjfb;
 	private DayZLNCtoBQSenderBySoSale soSale;
 	private DayZLNCtoBQSenderBySoSaleorderB soSaleorderB;
 	private DayZLNCtoBQSenderBySoApply soApply;
@@ -30,6 +32,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	private DayZLNCtoBQSenderByIcGeneralH icGeneralH;
 	private DayZLNCtoBQSenderByIcWastagebill wastagebill;
 	private DayZLNCtoBQSenderByIcWastagebillB wastagebillB;
+	private Thread TarapDjzb;
+	private Thread TarapDjfb;
 	private Thread TsoSale;
 	private Thread TsoSaleorderB;
 	private Thread TsoApply;
@@ -49,6 +53,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	public void destroy() {
 		// sender.stop();
 		try {
+			TarapDjzb.join(1000L);
+			TarapDjfb.join(1000L);
 			TsoSale.join(1000L);
 			TsoSaleorderB.join(1000L); 
 			TsoApply.join(1000L);
@@ -61,6 +67,10 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 			TicGeneralH.join(1000L);
 			Twastagebill.join(1000L);
 			TwastagebillB.join(1000L);
+			if (TarapDjzb.isAlive())
+				System.out.println("抽取单据主表增量NC数据到BQ数据仓库的线程未停止。");
+			if (TarapDjfb.isAlive())
+				System.out.println("抽取单据辅表增量NC数据到BQ数据仓库的线程未停止。");
 			if (TsoSale.isAlive())
 				System.out.println("抽取订单主表增量NC数据到BQ数据仓库的线程未停止。");
 			if (TsoSaleorderB.isAlive())
@@ -90,6 +100,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	}
 
 	public void init() throws ServletException {
+		arapDjzb = new DayZLNCtoBQSenderByArapDjzb();
+		arapDjfb = new DayZLNCtoBQSenderByArapDjfb();
 		soSale = new DayZLNCtoBQSenderBySoSale();
 		soSaleorderB = new DayZLNCtoBQSenderBySoSaleorderB();
 		soApply = new DayZLNCtoBQSenderBySoApply();
@@ -103,6 +115,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		wastagebill = new DayZLNCtoBQSenderByIcWastagebill();
 		wastagebillB = new DayZLNCtoBQSenderByIcWastagebillB();
 		System.out.println("程序初始化！");
+		TarapDjzb = new Thread(arapDjzb);
+		TarapDjfb = new Thread(arapDjfb);
 		TsoSale = new Thread(soSale);
 		TsoSaleorderB = new Thread(soSaleorderB);
 		TsoApply = new Thread(soApply);
@@ -126,6 +140,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
             public void run() {
             	try {
 					System.out.println("抽取增量NC数据到BQ数据仓库启动线程！"); 
+					System.out.println(TarapDjzb.isAlive());
+					System.out.println(TarapDjfb.isAlive());
 					System.out.println(TsoSale.isAlive());
 					System.out.println(TsoSaleorderB.isAlive());
 					System.out.println(TsoApply.isAlive());
@@ -139,6 +155,14 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 					System.out.println(Twastagebill.isAlive());
 					System.out.println(TwastagebillB.isAlive());
 					
+					if(!TarapDjzb.isAlive()){
+						TarapDjzb = new Thread(arapDjzb);
+						TarapDjzb.start();
+					}
+					if(!TarapDjfb.isAlive()){
+						TarapDjfb = new Thread(arapDjfb);
+						TarapDjfb.start();
+					}
 					if(!TsoSale.isAlive()){
 						TsoSale = new Thread(soSale);
 						TsoSale.start();

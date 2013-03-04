@@ -163,14 +163,14 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements
 			sql.append("  TDELIVERTIME            ,");
 			sql.append("  TS                      ,");
 			sql.append("  VEDITREASON             ,");
-			sql.append("  VRECEIVEADDRESS           ");
+			sql.append("  VRECEIVEADDRESS         , ");
+			sql.append("  DR           ");
 			sql.append("  from so_saleorder_b sb");
-			sql.append("  where sb.dr=0 and sb.csaleid in (select s.csaleid from so_sale s ");
+			sql.append("  where sb.csaleid in (select s.csaleid from so_sale s ");
 			sql.append("  where s.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(s.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and s.dr=0");
 			sql.append("  and s.pk_corp != '1020'");
 			sql.append("  and s.pk_corp != '1021'");
 			sql.append("  and s.pk_corp != '1023'");
@@ -282,7 +282,8 @@ public class DayZLNCtoBQSenderBySoSaleorderB extends BaseDao implements
 				insetSql.append("  TDELIVERTIME            ,");
 				insetSql.append("  TS                      ,");
 				insetSql.append("  VEDITREASON             ,");
-				insetSql.append("  VRECEIVEADDRESS        ) values (    ");
+				insetSql.append("  VRECEIVEADDRESS        ,   ");
+				insetSql.append("  DR        ) values (    ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

@@ -137,13 +137,13 @@ public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 			sql.append("  VRECEIPTCODE       ,");
 			sql.append("  VRECEIVEADDRESS    ,");
 			sql.append("  BISSEND            ,");
-			sql.append("  NKPMNY                  ");
+			sql.append("  NKPMNY             ,     ");
+			sql.append("  DR                  ");
 			sql.append("  from so_saleinvoice sv");
 			sql.append("  where sv.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(sv.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and sv.dr=0");
 			sql.append("  and sv.pk_corp != '1020'");
 			sql.append("  and sv.pk_corp != '1021'");
 			sql.append("  and sv.pk_corp != '1023'");
@@ -228,7 +228,8 @@ public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  BISSEND            ,");
-				insetSql.append("  NKPMNY           ) values (       ");
+				insetSql.append("  NKPMNY           ,      ");
+				insetSql.append("  DR           ) values (       ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

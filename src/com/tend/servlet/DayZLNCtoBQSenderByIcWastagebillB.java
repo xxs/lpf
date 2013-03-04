@@ -185,15 +185,15 @@ public class DayZLNCtoBQSenderByIcWastagebillB extends BaseDao implements
 			sql.append("  VFREE5               ,");
 			sql.append("  VMEMO                ,");
 			sql.append("  VSOURCEBILLCODE      ,");
-			sql.append("  VSOURCEROWNO                              ");
+			sql.append("  VSOURCEROWNO         ,");
+			sql.append("  DR                              ");
 			sql.append("  from ic_wastagebill_b wb");
-			sql.append("  where wb.dr=0 and wb.cwastagebillid in (select w.cwastagebillid");
+			sql.append("  where wb.cwastagebillid in (select w.cwastagebillid");
 			sql.append("      from ic_wastagebill w");
 			sql.append("      where w.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(w.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
 			sql.append("  and w.pk_corp != '1023'");
@@ -327,7 +327,8 @@ public class DayZLNCtoBQSenderByIcWastagebillB extends BaseDao implements
 				insetSql.append("  VFREE5               ,");
 				insetSql.append("  VMEMO                ,");
 				insetSql.append("  VSOURCEBILLCODE      ,");
-				insetSql.append("  VSOURCEROWNO      ) values (        ");
+				insetSql.append("  VSOURCEROWNO      ,       ");
+				insetSql.append("  DR      ) values (        ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

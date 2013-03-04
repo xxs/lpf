@@ -110,32 +110,39 @@ public class PersonListServlet extends HttpServlet {
 			file1 = "/fileupload/file/personlistfile/pcexcel/" + file.get(0);
 			try {
 
-				insertVsession(request.getRealPath(file1), vname,vremark,vdate,vdatescope,vaddress,vmaker);
+				insertVsession(request.getRealPath(file1), vname,vremark,vdate,vdatescope,vaddress,vmaker,resp);
 
 				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"申请会议成功!\");");
+				out.print("window.alert(\"申请会议成功!！！\");");
 				out.print("window.close();");
 				out.print("opener.location.reload();");
 				out.print("</script>");
 			} catch (Exception e) {
 				e.printStackTrace();
 				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"申请会议失败!\");");
+				out.print("window.alert(\"申请会议失败1!\");");
 				out.print("window.close();");
 				out.print("opener.location.reload();");
 				out.print("</script>");
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+			out.print("<script language=\"javascript\" >");
+			out.print("window.alert(\"申请会议失败2!\");");
+			out.print("window.close();");
+			out.print("opener.location.reload();");
+			out.print("</script>");
 		}
 		out.close();
 	}
 
-	public static void insertVsession(String path, String vname,String vremark,String vdate,String vdatescope,String vaddress,String vmaker) throws Exception {
+	public static void insertVsession(String path, String vname,String vremark,String vdate,String vdatescope,String vaddress,String vmaker,HttpServletResponse resp) throws Exception {
 		System.out.println("开始执行保存方法");
+		PrintWriter out = resp.getWriter();
 		String sql = "";
 		//执行插入表头操作
 		conn = DBOracleconn.getDBConn();
+		conn.setAutoCommit(false); //设置不会自动提交 
 		stmt = conn.createStatement();
 		sql = "insert into XX_VSESSION (PK_VID, VNAME, VREMARK,VDATE,VDATESCOPE,VADDRESS,CREATEDATE,VSTATE,VMAKER)";
         sql = sql + " values(XX_VSESSION_SEQ.nextval,'" + vname + "','" + vremark + "','" + vdate + "','" + vdatescope + "','" + vaddress + "',to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'申请','"+vmaker+"')";
@@ -152,14 +159,12 @@ public class PersonListServlet extends HttpServlet {
 			System.out.println(pk_vid);
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				conn.commit();
-				DBOracleconn.closeDBconn();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+			out.print("<script language=\"javascript\" >");
+			out.print("window.alert(\"申请会议失败!\");");
+			out.print("window.close();");
+			out.print("opener.location.reload();");
+			out.print("</script>");
+		} 
 		
 		//执行插入表体操作
 		try {
@@ -169,24 +174,33 @@ public class PersonListServlet extends HttpServlet {
 			String userphone = "";
 			wbk = Workbook.getWorkbook(is);
 			Sheet sheet = wbk.getSheet(0);
-			conn = DBOracleconn.getDBConn();
-			stmt = conn.createStatement();
 			try {
 				for (int i = 1; i < sheet.getRows(); i++) {
 					username = sheet.getCell(0, i).getContents();
 					userphone = sheet.getCell(1, i).getContents();
-
-					sql = "insert into XX_VSESSION_INFO (PK_VID, USERNAME, USERPHONE)";
-					              sql = sql + " values(" + pk_vid + ",'" + username + 
-					                "','" + userphone + "')";
-								System.out.println(sql);
-								stmt.execute(sql);
+						if(username!="" && userphone!=""){
+							sql = "insert into XX_VSESSION_INFO (PK_VID, USERNAME, USERPHONE)";
+							sql = sql + " values(" + pk_vid + ",'" + username + 
+									"','" + userphone + "')";
+							System.out.println(sql);
+							stmt.execute(sql);
+						}
 					}
+				out.print("<script language=\"javascript\" >");
+				out.print("window.alert(\"申请会议成功!！！\");");
+				out.print("window.close();");
+				out.print("opener.location.reload();");
+				out.print("</script>");
+				conn.commit();
 			} catch (Exception e) {
 				e.printStackTrace();
+				out.print("<script language=\"javascript\" >");
+				out.print("window.alert(\"申请会议失败!\");");
+				out.print("window.close();");
+				out.print("opener.location.reload();");
+				out.print("</script>");
 			} finally {
 				try {
-					conn.commit();
 					DBOracleconn.closeDBconn();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -194,7 +208,13 @@ public class PersonListServlet extends HttpServlet {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			out.print("<script language=\"javascript\" >");
+			out.print("window.alert(\"申请会议失败!导入的excel必须是office2003版的模板文件\");");
+			out.print("window.close();");
+			out.print("opener.location.reload();");
+			out.print("</script>");
 		}
+		out.close();
 	}
 
 }

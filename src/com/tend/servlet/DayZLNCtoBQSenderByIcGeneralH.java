@@ -139,13 +139,13 @@ public class DayZLNCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 			sql.append("		  VUSERDEF6         ,           ");
 			sql.append("		  VUSERDEF7         ,           ");
 			sql.append("		  VUSERDEF8         ,           ");
-			sql.append("		  VUSERDEF9                     ");
+			sql.append("		  VUSERDEF9         ,           ");
+			sql.append("		  DR                     ");
 			sql.append("		  from ic_general_h gh          ");
 			sql.append("		  where gh.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("		  and substr(gh.ts,1,10)>=to_char((sysdate - ")
 					.append(this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("		  and gh.dr=0                    ");
 			sql.append("		  and gh.pk_corp != '1020'       ");
 			sql.append("		  and gh.pk_corp != '1021'       ");
 			sql.append("		  and gh.pk_corp != '1023'       ");
@@ -232,7 +232,8 @@ public class DayZLNCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 				insetSql.append("	  VUSERDEF6         ,                        ");
 				insetSql.append("	  VUSERDEF7         ,                        ");
 				insetSql.append("	  VUSERDEF8         ,                        ");
-				insetSql.append("	  VUSERDEF9          ) values (              ");
+				insetSql.append("	  VUSERDEF9        ,             ");
+				insetSql.append("	  DR          ) values (              ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1

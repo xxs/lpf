@@ -186,15 +186,15 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  VRECEIVEADDRESS         ,");
 			sql.append("  VRETURNMODE             ,");
 			sql.append("  VSERIALCODE             ,");
-			sql.append("  VSOURCECODE                                   ");
+			sql.append("  VSOURCECODE             ,");
+			sql.append("  DR                       ");
 			sql.append("  from so_apply_b ayb");
-			sql.append("  where ayb.dr=0 and ayb.pk_apply in (select ay.pk_apply");
+			sql.append("  where ayb.pk_apply in (select ay.pk_apply");
 			sql.append("  from so_apply ay");
 			sql.append("  where ay.dbilldate >=to_char((sysdate - ").append(
 					this.getDays() + "),'yyyy-mm-dd')");
 			sql.append("  and substr(ay.ts,1,10)>=to_char((sysdate - ").append(
 					this.getBeforedays() + "),'yyyy-mm-dd')");
-			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");
 			sql.append("  and ay.pk_corp != '1021'");
 			sql.append("  and ay.pk_corp != '1023'");
@@ -330,7 +330,8 @@ public class DayZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIVEADDRESS         ,");
 				insetSql.append("  VRETURNMODE             ,");
 				insetSql.append("  VSERIALCODE             ,");
-				insetSql.append("  VSOURCECODE          ) values ( ");
+				insetSql.append("  VSOURCECODE          , ");
+				insetSql.append("  DR          ) values ( ");
 				for (int i = 1; i <= resultcount; i++) {
 
 					if (rsmd.getColumnType(i) == 1
