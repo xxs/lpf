@@ -46,13 +46,14 @@ public class PersonListServlet extends HttpServlet {
 		try {
 			GetDate date = new GetDate();
 			String time = date.getDate();
-			System.out.println("createdate:"+time);
+			//System.out.println("createdate:"+time);
 			String vname = request.getParameter("vname");
 			String vremark = request.getParameter("vremark");
 			String vdate = request.getParameter("vdate");
 			String vdatescope = request.getParameter("vdatescope");
 			String vaddress = request.getParameter("vaddress");
 			String vmaker = request.getParameter("vmaker");
+			String vdeptid = request.getParameter("vdeptid");
 
 			String names = "";
 			String path = request.getRealPath("/")+"/fileupload/file/personlistfile";
@@ -110,7 +111,7 @@ public class PersonListServlet extends HttpServlet {
 			file1 = "/fileupload/file/personlistfile/pcexcel/" + file.get(0);
 			try {
 
-				insertVsession(request.getRealPath(file1), vname,vremark,vdate,vdatescope,vaddress,vmaker,resp);
+				insertVsession(request.getRealPath(file1), vname,vremark,vdate,vdatescope,vaddress,vmaker,vdeptid,resp);
 
 				out.print("<script language=\"javascript\" >");
 				out.print("window.alert(\"申请会议成功!！！\");");
@@ -136,27 +137,27 @@ public class PersonListServlet extends HttpServlet {
 		out.close();
 	}
 
-	public static void insertVsession(String path, String vname,String vremark,String vdate,String vdatescope,String vaddress,String vmaker,HttpServletResponse resp) throws Exception {
-		System.out.println("开始执行保存方法");
+	public static void insertVsession(String path, String vname,String vremark,String vdate,String vdatescope,String vaddress,String vmaker,String vdeptid,HttpServletResponse resp) throws Exception {
+		//System.out.println("开始执行保存方法");
 		PrintWriter out = resp.getWriter();
 		String sql = "";
 		//执行插入表头操作
 		conn = DBOracleconn.getDBConn();
 		conn.setAutoCommit(false); //设置不会自动提交 
 		stmt = conn.createStatement();
-		sql = "insert into XX_VSESSION (PK_VID, VNAME, VREMARK,VDATE,VDATESCOPE,VADDRESS,CREATEDATE,VSTATE,VMAKER)";
-        sql = sql + " values(XX_VSESSION_SEQ.nextval,'" + vname + "','" + vremark + "','" + vdate + "','" + vdatescope + "','" + vaddress + "',to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'申请','"+vmaker+"')";
-        System.out.println(sql);
+		sql = "insert into XX_VSESSION (PK_VID, VNAME, VREMARK,VDATE,VDATESCOPE,VADDRESS,CREATEDATE,VSTATE,VMAKER,VDEPTID)";
+        sql = sql + " values(XX_VSESSION_SEQ.nextval,'" + vname + "','" + vremark + "','" + vdate + "','" + vdatescope + "','" + vaddress + "',to_char(sysdate,'YYYY-MM-DD HH24:MI:SS'),'申请','"+vmaker+"',"+vdeptid+")";
+        //System.out.println(sql);
         Integer pk_vid = 0;
 		try {
 			stmt.execute(sql);
-			System.out.println("select max(pk_vid) pk_vid from XX_VSESSION  where vname = '"+vname+"' and vremark = '"+vremark+"' and vmaker = '"+vmaker+"'");
-			rs = stmt.executeQuery("select max(pk_vid) pk_vid from XX_VSESSION  where vname = '"+vname+"' and vremark = '"+vremark+"' and vmaker = '"+vmaker+"'");
-			System.out.println(pk_vid);
+			//System.out.println("select max(pk_vid) pk_vid from XX_VSESSION  where vname = '"+vname+"' and vremark = '"+vremark+"' and vmaker = '"+vmaker+"'");
+			rs = stmt.executeQuery("select max(pk_vid) pk_vid from XX_VSESSION  where vname = '"+vname+"' and vremark = '"+vremark+"' and vmaker = '"+vmaker+"' and vdeptid = "+vdeptid+"");
+			//System.out.println(pk_vid);
 			while(rs.next()){
 				pk_vid = rs.getInt("pk_vid");
 			}
-			System.out.println(pk_vid);
+			//System.out.println(pk_vid);
 		} catch (Exception e) {
 			e.printStackTrace();
 			out.print("<script language=\"javascript\" >");
@@ -182,7 +183,7 @@ public class PersonListServlet extends HttpServlet {
 							sql = "insert into XX_VSESSION_INFO (PK_VID, USERNAME, USERPHONE)";
 							sql = sql + " values(" + pk_vid + ",'" + username + 
 									"','" + userphone + "')";
-							System.out.println(sql);
+							//System.out.println(sql);
 							stmt.execute(sql);
 						}
 					}

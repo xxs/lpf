@@ -67,7 +67,7 @@ public class BaseDao {
 	public Connection getConForBQ(){
 		Connection con = null;
 		String dirver = "oracle.jdbc.driver.OracleDriver";
-		String url = "jdbc:oracle:thin:@100.100.1.172:1521:test";
+		String url = "jdbc:oracle:thin:@100.100.1.27:1521:bidb";
 		try{
 			Class.forName(dirver);
 			con = DriverManager.getConnection(url,"bius01","bius_123");

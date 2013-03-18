@@ -23,7 +23,7 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2013-02-16", "2013-02-18",1);
+			DateLoop("2013-03-02", "2013-03-05",1);
 			System.out.println("单据辅表数据增量抽取完成");
 		} catch (Exception e) {
 			System.out.println("单据辅表抽取数据异常");
