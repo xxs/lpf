@@ -7,26 +7,27 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+
+
+
 /**
- * 单据辅表数据增量抽取
+ * 单据辅表增量数据抽取
  * @author Administrator
  *
  */
-public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
+public class TempNCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 
-	public NCtoBQSenderByArapDjfb() {
-		System.out.println("单据辅表数据增量抽取--无参构造函数"); 
+	public TempNCtoBQSenderByArapDjfb() {
+		System.out.println("单据辅表增量数据抽取--无参构造函数");
 	}
-
-	/**
-	 * 自动执行的run方法
-	 */
 	public void run() {
 		try {
-			DateLoop("2013-02-15", "2013-03-21",1);
-			System.out.println("单据辅表数据增量抽取完成");
+			DeleteDate();//清空ods表数据
+			DateLoop("2013-03-28", "2013-04-03",1);
+			System.out.println("单据辅表增量数据抽取完成");
 		} catch (Exception e) {
-			System.out.println("单据辅表抽取数据异常");
+			System.out.println("单据辅表抽取增量数据异常");
 			e.printStackTrace();
 		}
 	}
@@ -40,21 +41,34 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 		Date date1 = sdf.parse(begindate);
 		Date date2 = sdf.parse(enddate);
 		Date datetemp = mm.getDateAfterDay(date1, days);
-		System.out.println("单据辅表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
+		System.out.println("单据主表时间区间："+sdf.format(date1)+" to "+sdf.format(datetemp));
 		NCtoBQ(sdf.format(date1), sdf.format(datetemp));
 		while(mm.dateCompare(datetemp , date2)){
 			datetemp = mm.getDateAfterDay(datetemp, days);
 			if(mm.dateCompare(date2  ,datetemp )){
-				System.out.println("单据辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(date2));
-				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(date2));
+				System.out.println("单据主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days+1))+" to "+sdf.format(date2));
+				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days+1)), sdf.format(date2));
 			}else{
-				System.out.println("单据辅表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days))+" to "+sdf.format(datetemp));
-				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days)), sdf.format(datetemp));
+				System.out.println("单据主表时间区间："+sdf.format(mm.getDateAfterDay(datetemp, -days+1))+" to "+sdf.format(datetemp));
+				NCtoBQ(sdf.format(mm.getDateAfterDay(datetemp, -days+1)), sdf.format(datetemp));
 			}
 		}
 	}
 	/**
-	 * 抽取数据
+	 * 清空表数据
+	 * @throws Exception
+	 */
+	public void DeleteDate() throws Exception {
+		String sql = "delete ods_arap_djfb";
+		boolean result = this.excuteDelete(sql);
+		if(!result){
+			System.out.println("操作成功");
+		}else{
+			System.out.println("操作失败");
+		}
+	}
+	/**
+	 * 抽取增量数据
 	 * 
 	 * @throws Exception
 	 */
@@ -65,7 +79,7 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 		Connection conBQ = null;
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
-		System.out.println("单据辅表数据增量抽取开始................");
+		System.out.println("单据辅表开始抽取增量数据................");
 		System.out.println("开始时间为"+new Timestamp(new Date().getTime()));
 		try {
 			System.out.println("单据辅表获取连接");
@@ -273,16 +287,17 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 			sql.append("  ZYX9, ");
 			sql.append("  DR ");
 			sql.append(" from arap_djfb f");
-			sql.append(" where  f.vouchid in (select z.vouchid");
-			sql.append("                    from arap_djzb z");
-			sql.append("		    where z.dwbm != '1020'");
-			sql.append("                    and z.dwbm != '1021'");
-			sql.append("                    and z.dwbm != '1023'");
-			sql.append("                    and z.dwbm != '1024'");
-			sql.append("                    and z.dwbm != '1032'");
-			sql.append("                    and z.ts>='").append(start+"'");
-			sql.append("                    and z.ts<='").append(end+"' ) ");
-			//System.out.println("查询sql:"+sql);
+			sql.append("  where f.vouchid in (select z.vouchid from arap_djzb z ");
+			sql.append("  where z.djrq >=to_char((sysdate - 180),'yyyy-mm-dd')");
+			sql.append("  and substr(z.ts,1,10)>='").append(start+"'");
+			sql.append("  and substr(z.ts,1,10)<='").append(start+"'");
+			sql.append("  and z.dwbm != '1020'");
+			sql.append("  and z.dwbm != '1021'");
+			sql.append("  and z.dwbm != '1023'");
+			sql.append("  and z.dwbm != '1024'"); 
+			sql.append("  and z.dwbm != '1032' )");
+			
+			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();
@@ -488,7 +503,7 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 				insetSql.append("  ZYX7,");
 				insetSql.append("  ZYX8,");
 				insetSql.append("  ZYX9,");
-				insetSql.append("  DR ) values ( ");
+				insetSql.append("  DR ) values ( "); 
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
@@ -512,13 +527,13 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 						//System.out.println(insetSql);
 					}
 					try {
-						//执行存入数据
+						//执行存入增量数据
 						pstBQ = conBQ.prepareStatement(insetSql.toString());
 						boolean result = pstBQ.execute();
 						if(!result){
-							System.out.println("第"+tm+"条F保存成功");
+							System.out.println("第"+tm+"条B保存成功");
 						}else{
-							System.out.println("第"+tm+"条F保存失败");
+							System.out.println("第"+tm+"条B保存失败");
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -533,7 +548,7 @@ public class NCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 					}
 					tm++;
 			 }                                                         
-			System.out.println("单据辅表数据增量抽取完毕");
+			System.out.println("单据辅表增量数据抽取完毕");
 			System.out.println("结束时间为"+new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();

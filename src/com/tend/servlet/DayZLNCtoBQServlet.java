@@ -19,7 +19,7 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	//BaseDao baseDao ;
 	private DayZLNCtoBQSenderByArapDjzb arapDjzb;
-	private DayZLNCtoBQSenderByArapDjfb arapDjfb;
+	private DayZLNCtoBQSenderByArapDjfb arapDjfb; 
 	private DayZLNCtoBQSenderBySoSale soSale;
 	private DayZLNCtoBQSenderBySoSaleorderB soSaleorderB;
 	private DayZLNCtoBQSenderBySoApply soApply;

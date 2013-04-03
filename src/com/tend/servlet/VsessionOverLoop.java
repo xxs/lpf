@@ -25,7 +25,6 @@ public class VsessionOverLoop implements Runnable {
 	 * 自动释放视频账号方法
 	 */	
 	public static void Free(){
-		//执行插入表头操作
 		conn = DBOracleconn.getDBConn();
 		try {
 			cs = conn.prepareCall("{call xx_autoovervsession_proc}");

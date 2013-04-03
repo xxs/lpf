@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 
 public class BaseDao {
 	//public Integer nexttime = 120000;
-	public Integer days = 60;
+	public Integer days = 180;  
 	public Integer beforedays = 1;
 	
 	
