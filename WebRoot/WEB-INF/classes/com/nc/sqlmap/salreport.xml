@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="salreport">
+	<select id="getPeriodNoById" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+	    SELECT periodNo,startDate||'-'||endDate  periodTEXT FROM sal_plan_period" + " WHERE enterpriseCode = 'sn' AND scheduleUnit = #type# ORDER BY periodNo
+	</select>
+	
+   <select id="getAreacodeById" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+	   select  areacode ,  areadesc from ent_area where enterprisecode='sn'  and  substr(areacode,0,2) =#parentareacode#
+	   and length(areacode) = 4 or parentareacode=#parentareacode#
+   </select>
+  <select id="getOrgdescById"  resultClass="java.util.HashMap"> 
+       select t.orgcode, t.orgdesc  from ent_org t where   t.enterprisecode = 'sn'  and t.orgtype = '03'
+  </select>
+  
+   <select id="getOrgdescBycode"  resultClass="java.util.HashMap"> 
+   select  t.orgcode, t.orgdesc  from ent_org t where   t.enterprisecode = 'sn'  and t.orgtype = '03'
+    </select>
+    
+  <select id="getItemTypeById" resultClass="java.util.HashMap">
+   select pt.itemtypecode ,pt.itemtypedesc from ent_item_type pt where
+     pt.enterprisecode='sn'	 and pt.categorycode='0'
+    and pt.itemtypecode in (select substr(e.itemtypecode,0,4) from  ent_item e where e.enterprisecode='sn'    ) 
+  </select>
+  
+  <select id="getAreacode" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+     select  areacode , areadesc  from ent_area where enterprisecode='sn' 
+     and length(areacode) = 4 and parentareacode is not null
+  </select>
+  
+  <select id="getItemtypedesc" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+     select pt.itemtypecode class1,  pt.itemtypedesc class2
+  from ent_item_type pt where pt.parentitemtypecode = #typecode# and pt.enterprisecode = 'sn' and pt.categorycode='1'
+  </select>
+  
+  <select id="getProduceClass" parameterClass="java.lang.String"  resultClass="java.util.HashMap">
+  select t.invclasscode,t.invclassname 
+from (select t.invclasscode,t.invclassname from nc.bd_invcl t 
+union  all
+select distinct d.invcode,d.invname from nc.bd_invbasdoc d) t 
+where substr(t.invclasscode,0,length(#pid#))=#pid#
+ and length(t.invclasscode)-length(#pid#) &lt; 4 and  length(t.invclasscode)-length(#pid#) &gt; 1 order by invclasscode
+  </select>
+<select id="getareatree" parameterClass="java.lang.String"  resultClass="java.util.HashMap">
+    select  t.deptcode,t.deptname,t.pk_deptdoc from nc.bd_deptdoc t where t.pk_corp='1001' and t.pk_fathedept = #pid#
+</select>
+
+<select id="getareatreeisLeaf" parameterClass="java.lang.String"  resultClass="int">
+  select count(*) leafcount from nc.bd_deptdoc t where t.pk_fathedept = #pid#
+</select>
+  
+<select id="isLeaf" parameterClass="java.lang.String"  resultClass="int">
+  select count(*) leafcount from (select t.invclasscode,t.invclassname from nc.bd_invcl t 
+union  all
+select distinct d.invcode,d.invname from nc.bd_invbasdoc d) t  where substr(t.invclasscode,0,length(#pid#))=#pid#
+</select>
+
+
+  <select id="pTrendReport" parameterClass="java.util.Map"
+   resultClass="java.util.HashMap">
+   select month,sum(salemoney) salemoney,sum(salenum)  salenum
+	,sum(salemoney1) salemoney1,sum(salenum1)  salenum1
+	,sum(salemoney2) salemoney2,sum(salenum2)  salenum2
+	from (select substr(t.indate,1,4) year,substr(t.indate,6,2) month,
+	t.ingood/10000 salemoney,t.innum salenum,0 salemoney1,0 salenum1,0 salemoney2,0 salenum2
+	from temp_report_forecast t     
+	where   t.ORGTYPE &lt;&gt; 'A'
+ <dynamic> 
+     <isNotEmpty property="date2" prepend=" and ">  
+        substr(t.indate,1,7) &gt;= #date2# 
+    </isNotEmpty>
+     <isNotEmpty property="date3" prepend=" and ">  
+        substr(t.indate,1,7) &lt;= #date3# 
+     </isNotEmpty>
+    <isNotEmpty property="produceclass" prepend="and">
+       t.itemcode like '$produceclass$%'
+    </isNotEmpty>
+     <isNotEmpty property="querytype1" prepend="and">
+        t.ORGTYPE = #querytype1#
+    </isNotEmpty>
+      <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+    <isNotEmpty property="area1" prepend="and">
+       t.AREA1NAME = #area1#
+    </isNotEmpty>
+      <isNotEmpty property="area2" prepend="and">
+       t.ORGNAME = #area2#
+    </isNotEmpty>
+       <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+   
+     </dynamic> 
+	
+	
+	
+	union all
+	select substr(t.indate,1,4) year , substr(t.indate,6,2) month,0,0,0,0,t.ingood/10000 salemoney,t.innum salenum 
+	from temp_report_forecast t   
+		where   t.ORGTYPE &lt;&gt; 'A'
+ <dynamic> 
+     <isNotEmpty property="date2" prepend=" and ">  
+        substr(to_char(add_months(to_date(indate,'yyyy-mm-dd'),12),'yyyy-mm-dd'), 1, 7)  &gt;= #date2# 
+    </isNotEmpty>
+     <isNotEmpty property="date3" prepend=" and ">  
+       substr(to_char(add_months(to_date(indate,'yyyy-mm-dd'),12),'yyyy-mm-dd'), 1, 7)  &lt;= #date3# 
+     </isNotEmpty>
+       <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+    <isNotEmpty property="produceclass" prepend="and">
+       t.itemcode like '$produceclass$%'
+    </isNotEmpty>
+     <isNotEmpty property="querytype1" prepend="and">
+        t.ORGTYPE = #querytype1#
+    </isNotEmpty>
+    <isNotEmpty property="area1" prepend="and">
+       t.AREA1NAME = #area1#
+    </isNotEmpty>
+      <isNotEmpty property="area2" prepend="and">
+       t.ORGNAME = #area2#
+    </isNotEmpty>
+       <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>
+    
+   
+	
+	)group by  month   
+   
+   
+   
+
+  </select> 
+  
+  
+    <select id="daySaleNum" parameterClass="java.util.Map"
+   resultClass="java.util.HashMap">
+    select dd,sum(innum) innum,sum(lastinnum) lastinnum from(
+        select to_number(substr(indate, 9, 2)) dd,innum,0 lastinnum from temp_report_forecast
+        <![CDATA[
+          where innum>0 and substr(to_char(add_months(to_date(indate,'yyyy-mm-dd'),1),'yyyy-mm-dd'), 1, 7) = #date2#
+        ]]>
+     <dynamic>       
+    <isNotEmpty property="form_startm" prepend="and">
+     <![CDATA[
+       substr(t.indate,1,7)= #date2#
+     ]]>
+    </isNotEmpty>
+      <isNotEmpty property="produceclass" prepend="and">
+        itemcode like '$produceclass$%'
+    </isNotEmpty>
+      <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+     <isNotEmpty property="querytype1" prepend="and">
+        ORGTYPE = #querytype1#
+    </isNotEmpty>
+    <isNotEmpty property="area1" prepend="and">
+       AREA1NAME = #area1#
+    </isNotEmpty>
+      <isNotEmpty property="area2" prepend="and">
+       ORGNAME = #area2#
+    </isNotEmpty>
+        <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>
+               union all
+               select to_number(substr(indate, 9, 2)) dd,0 innum,innum lastinnum from temp_report_forecast
+        <![CDATA[
+          where innum>0 and substr(to_char(add_months(to_date(indate,'yyyy-mm-dd'),12),'yyyy-mm-dd'), 1, 7) = #date2#
+        ]]>
+     <dynamic>       
+    <isNotEmpty property="form_startm" prepend="and">
+     <![CDATA[
+       substr(to_char(add_months(to_date(t.indate,'yyyy-mm-dd'),11),'yyyy-mm-dd'), 1, 7)= #date2#
+     ]]>
+    </isNotEmpty>
+       <isNotEmpty property="produceclass" prepend="and">
+       itemcode like '$produceclass$%'
+    </isNotEmpty>
+    <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+	</isNotEmpty>
+     <isNotEmpty property="querytype1" prepend="and">
+        ORGTYPE = #querytype1#
+    </isNotEmpty>
+    <isNotEmpty property="area1" prepend="and">
+       AREA1NAME = #area1#
+    </isNotEmpty>
+      <isNotEmpty property="area2" prepend="and">
+       ORGNAME = #area2#
+    </isNotEmpty>
+        <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>
+    )
+    group by dd
+  </select> 
+  
+<select id="salAnalyseSqlSum"  parameterClass="java.util.Map" resultClass="int">
+    select count(*) from ( select itemname from temp_report_forecast t where ingood>0 group by itemname)
+</select> 
+  
+<select id="SalAnalyseSql" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+
+  select itemname,salenum,hbsalenum,tbsalenum,salemoney,hbsalemoney,tbsalemoney,costmny,hbcostmny,
+  tbcostmny,cancelmoney,cancelnum,(salemoney-costmny) GROSS, sum(salemoney-costmny) over() allGROSS 
+  ,sum(salemoney) over() allmoney,sum(salenum) over() allsalenum  from(select itemname,
+       sum(salenum) salenum,
+       sum(hbsalenum) hbsalenum,
+       sum(tbsalenum) tbsalenum,
+    
+       sum(salemoney) salemoney,
+       sum(hbsalemoney) hbsalemoney,
+       sum(tbsalemoney) tbsalemoney,
+
+       sum(costmny) costmny,
+       sum(hbcostmny) hbcostmny,
+       sum(tbcostmny) tbcostmny,
+       sum(cancelmoney) cancelmoney,
+       sum(cancelnum) cancelnum
+
+  from (select itemname,
+               0 salenum,
+               innum hbsalenum,
+               0 tbsalenum,
+               0 salemoney,
+               ingood hbsalemoney,
+               0 tbsalemoney,
+               0 cancelmoney,
+               0 cancelnum,
+               costmny hbcostmny,
+               0 costmny,
+               0 tbcostmny
+          from temp_report_forecast
+         where to_char(add_months(to_date(indate, 'yyyy-mm-dd'), 1),
+                       'yyyy-mm-dd') &gt;= #startdata#
+           and to_char(add_months(to_date(indate, 'yyyy-mm-dd'), 1),
+                       'yyyy-mm-dd') &lt;= #enddata#
+      <dynamic>
+	    <isNotEmpty property="produceclass" prepend="and">
+	       itemcode like '$produceclass$%'
+	    </isNotEmpty>
+	      <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+	     <isNotEmpty property="querytype1" prepend="and">
+	        ORGTYPE = #querytype1#
+	    </isNotEmpty>
+	    <isNotEmpty property="area1" prepend="and">
+	       AREA1NAME = #area1#
+	    </isNotEmpty>
+	      <isNotEmpty property="area2" prepend="and">
+	       ORGNAME = #area2#
+	    </isNotEmpty>
+	        <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>             
+        union all
+        select itemname,
+               0 salenum,
+               0 hbsalenum,
+               innum tbsalenum,
+               0 salemoney,
+               0 hbsalemoney,
+               ingood tbsalemoney,
+               0 cancelmoney,
+               0 cancelnum,
+               0 hbcostmny,
+               0 costmny,
+               costmny tbcostmny              
+          from temp_report_forecast
+         where to_char(add_months(to_date(indate, 'yyyy-mm-dd'), 12),
+                       'yyyy-mm-dd') &gt;= #startdata#
+           and to_char(add_months(to_date(indate, 'yyyy-mm-dd'), 12),
+                       'yyyy-mm-dd') &lt;= #enddata#
+          <dynamic>
+		    <isNotEmpty property="produceclass" prepend="and">
+		       itemcode like '$produceclass$%'
+		    </isNotEmpty>
+		      <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+		     <isNotEmpty property="querytype1" prepend="and">
+		        ORGTYPE = #querytype1#
+		    </isNotEmpty>
+		    <isNotEmpty property="area1" prepend="and">
+		       AREA1NAME = #area1#
+		    </isNotEmpty>
+		      <isNotEmpty property="area2" prepend="and">
+		       ORGNAME = #area2#
+		    </isNotEmpty>
+		        <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>                     
+        union all
+        select itemname,
+               innum salenum,
+               0 hbsalenum,
+               0 tbsalenum,
+               ingood salemoney,
+               0 lmsalemoney,
+               0 lysalemoney,
+               - (case
+                   when ingood &lt; 0 then
+                    ingood
+                   else
+                    0
+                 end) cancelmoney,
+               - (case
+                   when innum &lt; 0 then
+                    innum
+                   else
+                    0
+                 end) cancelnum,
+               0 hbcostmny,
+               costmny,
+               0 tbcostmny                 
+          from temp_report_forecast
+         where indate &gt;= #startdata#
+           and indate &lt;= #enddata#
+            <dynamic>
+		    <isNotEmpty property="produceclass" prepend="and">
+		       itemcode like '$produceclass$%'
+		    </isNotEmpty>
+		    <isNotEmpty property="PK_CALBODY" prepend="and">
+		       ccalbodyid = #PK_CALBODY#
+		     </isNotEmpty>
+		     <isNotEmpty property="querytype1" prepend="and">
+		        ORGTYPE = #querytype1#
+		    </isNotEmpty>
+		    <isNotEmpty property="area1" prepend="and">
+		       AREA1NAME = #area1#
+		    </isNotEmpty>
+		      <isNotEmpty property="area2" prepend="and">
+		       ORGNAME = #area2#
+		    </isNotEmpty>
+		    <isNotEmpty property="PK_BUSITYPE" prepend="and">
+		       corpcls = #PK_BUSITYPE#
+		    </isNotEmpty>
+       </dynamic>        
+           ) 
+ group by itemname) order by salenum desc
+  </select>
+  
+<select id="selectcal" parameterClass="java.util.Map" resultClass="java.util.HashMap">  
+  select t.pk_calbody,t.bodyname from nc.bd_calbody t where t.pk_corp=1001
+</select>  
+
+<select id="busitype" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+select t.businame,t.pk_busitype from nc.bd_busitype t where t.pk_corp=1001 and t.busiprop = 1
+</select>
+  
+<select id="blackbook" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+select distinct entryuserdesc from( select entryuserdesc,itemid,sum(num) num from(select t.entryuserdesc,h.itemid,-h.requireqty num
+  from sal_forecast_head t, sal_forecast_detail h
+ where t.sourcetype = 'A104' and t.periodtype='M' and t.periodno = #PERIODNO#
+   and t.status = 'S'
+   and t.billno=h.billno
+union all
+select e.puremployeedesc,h.itemid,h.requireqty num
+  from sal_forecast_head t, sal_forecast_detail h,ent_org e
+ where t.sourcetype = 'C01' and t.periodtype='M' and t.periodno = #PERIODNO#
+   and t.status = 'S'
+   and t.billno=h.billno
+   and t.orgid=e.orgid) group by entryuserdesc,itemid) where num &lt;&gt; 0
+</select>
+
+
+</sqlMap>

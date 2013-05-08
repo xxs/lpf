@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="baseSys">
+
+        <typeAlias alias="userFunction"  type="com.nc.bean.UserFunctionBean"/>
+    
+    <typeAlias alias="userBean"  type="com.nc.bean.UserBean"/>
+    <typeAlias alias="roleBean"  type="com.nc.bean.RoleBean"/>
+       
+    <resultMap id="get-module-result" class="userFunction">    
+		<result property="functionId" column="moduleid"/> 
+		<result property="functionName" column="modulename"/> 
+		<result property="functionUrl" column="MODULEURL"/> 
+		<result property="parentFunctionId" column="pid"/>
+	    <result property="functionType" column="MODULETYPE"/>
+   </resultMap>
+   
+     <resultMap id="specialties-module-result" class="userFunction">    
+		<result property="functionId" column="moduleid"/> 
+		<result property="roleId" column="roleId"/> 
+		<result property="add" column="SYS_ADD"/> 
+		<result property="other" column="SYS_OTHER"/>
+	    <result property="edit" column="SYS_MOD"/>
+	    <result property="del" column="SYS_DEL"/>
+     </resultMap>
+   
+ 
+    
+    <resultMap id="roleBean" class="roleBean">    
+        <result property="roleId" column="roleId"/> 
+		<result property="roleName" column="roleName"/> 
+    </resultMap>
+
+   
+   <resultMap id="get-user-result" class="userBean">    
+        <result property="userId" column="userId"/> 
+		<result property="name" column="name"/> 
+		<result property="passWord" column="pass"/> 
+		<result property="skin" column="skin"/> 
+		<result property="userName" column="userName"/>
+    </resultMap>
+
+	<select id="getModuleByPid" parameterClass="java.lang.String" resultMap="get-module-result">
+	     select moduleid,modulename,MODULEURL,pid,MODULETYPE
+	     from SYS_MODULEINFO where pid=#pid#
+	</select>
+	
+	<select id="countRow" parameterClass="java.lang.String" resultClass="int">
+	     select count(*) from SYS_MODULEINFO where pid=#pid#
+	</select>
+	
+	<select id="getAllModel"  resultMap="get-module-result">
+	     select moduleid,modulename,MODULEURL,pid,MODULETYPE from SYS_MODULEINFO
+	</select>
+	
+	<update id="addModel"  parameterClass="java.util.Map">
+	     insert into SYS_MODULEINFO (modulename,MODULEURL,pid,MODULETYPE) values (#functionName#,#functionUrl#,#parentFunctionId#,#functionType#) 
+	</update>
+	
+	<delete id="delModel"  parameterClass="java.util.HashMap">
+	     delete from  SYS_MODULEINFO where moduleid=#delid#
+	</delete>
+	
+   <update id="updateModel"  parameterClass="java.util.Map">
+	     update SYS_MODULEINFO set modulename = #functionName#,MODULEURL=#functionUrl#,pid = #parentFunctionId#,MODULETYPE=#functionType# where  moduleid=#functionId# 
+	</update>
+	
+	<select id="getModulePage" parameterClass="java.util.Map" resultMap="get-module-result">
+	   select * from ( select row_.*, rownum rownum_ from (
+           select moduleid,modulename,MODULEURL,pid,MODULETYPE  from SYS_MODULEINFO t
+           <dynamic> 
+             <isNotEmpty property="dir" prepend=" order by">
+                 modulename  $dir$
+             </isNotEmpty>
+          </dynamic>    
+       ) row_ where rownum &lt;= #limit#)  where rownum_ &gt; #start#
+	</select>
+
+     <select id="getModulePageTotalCount" parameterClass="java.util.Map" resultClass="int">
+	      select count(*)  from SYS_MODULEINFO
+	</select>
+	
+	<select id="getUserPage" parameterClass="java.util.Map" resultMap="get-user-result">
+	   select * from ( select row_.*, rownum rownum_ from (
+           select userId,name,userName,pass,skin from BASE_USERINFO 
+           <dynamic> 
+             <isNotEmpty property="userName" prepend=" order by">
+                 userName  $userName$
+             </isNotEmpty>
+          </dynamic>    
+       ) row_ where rownum &lt;= #limit#)  where rownum_ &gt;= #start#
+	</select>
+	<select id="getUserPageTotalCount" parameterClass="java.util.Map" resultClass="int">
+	     select count(*) from BASE_USERINFO 
+	</select>
+	
+	<update id="addUser"  parameterClass="com.nc.bean.UserBean">
+	     insert into BASE_USERINFO (name,userName,skin,pass) values (#name#,#userName#,#skin#,#passWord#) 
+	</update>
+	
+	<update id="updateUser"  parameterClass="com.nc.bean.UserBean">
+	     update BASE_USERINFO set 
+	     <dynamic> 
+           <isNotEmpty property="name" > 
+	           name = #name# 
+	      </isNotEmpty>
+	      <isNotEmpty property="userName" prepend=","> 
+	       userName = #userName#
+	     </isNotEmpty>
+	     <isNotEmpty property="passWord" prepend=","> 
+	       pass=#passWord#
+	     </isNotEmpty>
+	     <isNotEmpty property="skin" prepend=","> 
+	        skin=#skin# 
+	      </isNotEmpty>
+	    </dynamic> 
+	     where userId=#userId#
+	</update>
+	
+	<delete id="delUser"  parameterClass="java.util.HashMap">
+	     delete from BASE_USERINFO  where userId=#delid#
+	</delete>
+	
+	<!-- 角色管理 begin -->
+	<select id="getRolePage" parameterClass="java.util.Map" resultMap="roleBean">
+	   select * from ( select row_.*, rownum rownum_ from (
+           select ROLEID,ROLENAME from SYS_ROLE 
+           <dynamic> 
+             <isNotEmpty property="roleName" prepend=" order by">
+                 ROLENAME  $roleName$
+             </isNotEmpty>
+          </dynamic>    
+       ) row_ where rownum &lt;= #limit#)  where rownum_ &gt;= #start#
+	</select>
+	
+    <update id="addRole"  parameterClass="java.util.Map">
+	     insert into SYS_ROLE (ROLENAME) values (#roleName#) 
+	</update>
+	
+	<update id="updateRole"  parameterClass="java.util.Map">
+	     update SYS_ROLE set  ROLENAME = #roleName# where ROLEID=#roleId#
+	</update>
+	
+	<delete id="delRole"  parameterClass="java.util.HashMap">
+		begin
+		     delete from SYS_ROLE  where ROLEID=#delid#;
+		     delete from sys_role_module where ROLEID=#delid#;
+		     delete from SYS_ROLE_USER where roleId = #delid#;
+		end;     
+	</delete>
+	
+	<select id="getRolePageTotalCount" parameterClass="java.util.Map" resultClass="int">
+	     select count(*) from SYS_ROLE 
+	</select>
+	
+    <select id="getRoleHaveModule" parameterClass="java.lang.String" resultClass="java.lang.String">
+	     select ModuleId from SYS_ROLE_MODULE where roleId = #roleId#
+	</select>
+	
+
+   <select id="getModuleForRole" parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+	  select * from sys_moduleinfo a left join (select * from sys_role_module where ROLEID = #roleId#) b on a.moduleid = b.moduleid
+	</select>
+	
+	<select id="selctForTotal"  parameterClass="java.util.HashMap" resultClass="int">
+	   select count(*) from sys_role_module where ROLEID = #roleid# and MODULEID = #moduleid#
+	</select>
+	
+	<delete id="delModuleForRole"  parameterClass="java.util.HashMap" >
+	    delete from sys_role_module where  ROLEID = #roleid# and MODULEID = #moduleid#
+	</delete>
+	
+	<update id="updateModueForRole" parameterClass="java.util.HashMap">
+	     update sys_role_module set SYS_ADD=#add#,SYS_DEL=#del#,SYS_MOD=#mod#,SYS_OTHER=#other# where  ROLEID = #roleid# and MODULEID = #moduleid#
+	</update>
+
+
+	<update id="saveModuleForRole"  parameterClass="java.util.HashMap">
+	     insert into sys_role_module (ROLEID,MODULEID,SYS_ADD,SYS_DEL,SYS_MOD,SYS_OTHER) values(#roleid#,#moduleid#,#add#,#del#,#mod#,#other#)
+	</update>
+	
+  <!-- 角色管理 end -->
+
+  <!-- 用户权限 begin -->
+    <select id="getUserForRole"  parameterClass="java.util.HashMap" resultClass="java.util.HashMap">
+	     select * from ( select row_.*, rownum rownum_ from (
+	        select a.userid, a.username, a.name, getallrolename(a.USERID) as rolename from BASE_USERINFO a
+	     ) row_ where rownum &lt;= #limit#)  where rownum_ &gt;= #start#
+    </select>
+    
+    <select id="getUserForRoleTotal"  parameterClass="java.util.HashMap" resultClass="int">
+        select count(*) from BASE_USERINFO a
+          
+    </select>
+   
+    
+    <select id="getAllRole"  resultMap="roleBean">
+	     select ROLEID,ROLENAME from SYS_ROLE 
+	</select>
+	
+	<select id="getRoleTotalForSaveOrUpdate"   parameterClass="java.util.HashMap" resultClass="int">
+	     select count(*) from SYS_ROLE_USER where userId = #userId# and roleId = #roleId#
+	</select>
+	
+	<update id="saveRoleForUser"  parameterClass="java.util.HashMap" >
+	        insert into SYS_ROLE_USER (userId,roleId) values (#userId#,#roleId#)
+	</update>
+	
+	<update id="updateRoleForUser" parameterClass="java.util.HashMap">
+	    update  SYS_ROLE_USER set roleId = #roleId#  where userId=#userId#
+	</update>
+  <!-- 用户权限 END -->
+  
+  <!-- 根据登录ID查找用户信息 -->
+  <select id="getUserbyUserName"   parameterClass="java.lang.String" resultMap="get-user-result">
+	   select name,userName,pass,userId,skin from BASE_USERINFO where userName=#userId#   
+   </select>
+   
+   <select id="getUserbyUserId"   parameterClass="java.lang.String" resultMap="get-user-result">
+	   select name,userName,pass,userId,skin from BASE_USERINFO where userId=#userId#   
+   </select>
+   
+  <!-- 根据用户ID查找角色信息 -->
+   <select id="getRoleByUserId" parameterClass="java.util.HashMap"  resultMap="roleBean">
+         select  b.roleId, b.roleName  from  SYS_ROLE_USER a,SYS_ROLE b   
+         Where a.roleid = b.roleid and a.userid = #userid#
+    </select>
+   <!-- 根据角色ID查找功能信息 -->
+   <select id="getFunctionbyRoleId"   parameterClass="java.lang.String" resultMap="specialties-module-result">
+	      select ROLEID,MODULEID,SYS_ADD,SYS_DEL,SYS_MOD,SYS_OTHER  from sys_role_module
+	      where ROLEID = #roleId#
+   </select>
+   
+  <update id="add_manage_view" parameterClass="java.util.Map">
+    insert  into SAL_MANAGE_REPORT_VIEW  (USERID,FIELDTEXT,FIELDNAME) values (#USERID#,#FIELDTEXT#,#FIELDNAME#)
+  </update>
+  
+   <update id="update_manage_view" parameterClass="java.util.Map">
+    update SAL_MANAGE_REPORT_VIEW  set   FIELDTEXT=#FIELDTEXT#,FIELDNAME=#FIELDNAME# where USERID=#USERID#
+  </update>
+  
+  <update id="del_manage_view" parameterClass="java.util.Map">
+     delete from SAL_MANAGE_REPORT_VIEW  where USERID = #delid#
+  </update>
+  
+  
+  
+  
+  
+    <select id="getUserViewForReport" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+	    select * from ( select row_.*, rownum rownum_ from (
+	       select u.USERID,USERNAME,NAME,FIELDNAME,FIELDTEXT from BASE_USERINFO u left join   SAL_MANAGE_REPORT_VIEW r on u.userid = r.userid
+	     ) row_ where rownum &lt;= #limit#)  where rownum_ &gt; #start#
+   </select>
+   
+     <select id="getUserViewForTotal" parameterClass="java.util.Map"  resultClass="int">
+	        select  count(*) from SAL_MANAGE_REPORT_VIEW
+   </select>
+   
+   <select id="getUserViewForSaveOrUpdate"   parameterClass="java.util.HashMap" resultClass="int">
+	     select count(*) from SAL_MANAGE_REPORT_VIEW where userId = #USERID# 
+	</select>
+  <select id="getUserViewByID" parameterClass="java.util.HashMap"  resultClass="java.util.HashMap"> 
+      select USERID,FIELDNAME,FIELDTEXT from BASE_USERINFO where  USERID= #USERID#
+  </select> 
+  
+  <select id="getManageUserList" parameterClass="java.util.HashMap"  resultClass="java.util.HashMap"> 
+      select NAME,FIELDNAME from BASE_USERINFO u  join   SAL_MANAGE_REPORT_VIEW r on u.userid = r.userid
+   </select> 
+ 
+   
+   <select id="getGoodsUserViewForReport" parameterClass="java.util.Map"  resultClass="java.util.HashMap">
+	    select * from ( select row_.*, rownum rownum_ from (
+	       select u.USERID,USERNAME,NAME,ORGNAME,AREANAME,ORGID,AREAID from BASE_USERINFO u left join   SAL_GOODS_REPORT_VIEW r on u.userid = r.userid
+	     ) row_ where rownum &lt;= #limit#)  where rownum_ &gt; #start#
+   </select>
+   
+      <select id="getGoodsUserViewForTotal" parameterClass="java.util.Map"  resultClass="int">
+	        select  count(*) from SAL_GOODS_REPORT_VIEW
+	        <dynamic> 
+             <isNotEmpty property="USERID" prepend=" where ">
+                  userId = #USERID# 
+             </isNotEmpty>
+          </dynamic>    
+   </select>
+   
+   
+   <update id="add_goodsmanage_view" parameterClass="java.util.Map">
+    insert  into SAL_GOODS_REPORT_VIEW  (USERID,ORGID,AREAID,ORGNAME,AREANAME) values (#USERID#,#ORGID#,#AREAID#,#ORGNAME#,#AREANAME#)
+  </update>
+  
+   <update id="update_goodsmanage_view" parameterClass="java.util.Map">
+    update SAL_GOODS_REPORT_VIEW  set  ORGID=#ORGID#,AREAID=#AREAID#,ORGNAME=#ORGNAME#,AREANAME=#AREANAME# where USERID=#USERID#
+  </update>
+  
+  <update id="del_goodsmanage_view" parameterClass="java.util.Map">
+     delete from SAL_GOODS_REPORT_VIEW  where USERID = #delid#
+  </update>
+   
+   <select id="getGoodsManageUserList" parameterClass="java.util.HashMap"  resultClass="java.util.HashMap"> 
+      select NAME,ORGID||','||AREAID ORGIDORAREAID  from BASE_USERINFO u  join   SAL_GOODS_REPORT_VIEW r on u.userid = r.userid
+   </select> 
+  
+  
+	
+</sqlMap>
