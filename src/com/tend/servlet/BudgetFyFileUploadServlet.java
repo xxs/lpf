@@ -47,6 +47,7 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 	
 			throws ServletException, IOException {
         String  area=request.getParameter("area");
+        String  year=request.getParameter("year");
 		resp.setContentType("text/html;charset=utf-8");
 		PrintWriter out = resp.getWriter();
 		FileItemFactory factory = new DiskFileItemFactory();
@@ -80,12 +81,12 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 			
 		}else{
 			try {
-				analyzingExcle(path,resp,area);
+				analyzingExcle(path,resp,area,year);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			out.print("<script language=\"javascript\" >");
-			out.print("window.alert(\"导入成功!！！\");");
+			out.print("window.alert(\"导入成功!\");");
 			out.print("window.close();");
 			out.print("opener.location.reload();");
 			out.print("</script>");
@@ -100,15 +101,21 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 		  
 	}
 
-	private static void analyzingExcle(String Path,HttpServletResponse resp,String area) throws Exception  {
+	private static void analyzingExcle(String Path,HttpServletResponse resp,String area,String year) throws Exception  {
 		PrintWriter out = resp.getWriter();
 		System.out.println(Path);
 		String sql = "";
 		conn = DBOracleconn.getDBConn();
 		conn.setAutoCommit(false);
+		stmt = conn.createStatement();
 		Map map = new HashMap();
 		InputStream is = null;
 		HSSFWorkbook hssfWorkbook = null;
+		String newyear = String.valueOf((Integer.parseInt(year)+1));
+		String deletesql = "delete gy_BUDGETEDCOSTTABLE where area = '1002AV100000000CI6ZY' and mon>='"+year+"-07' and mon<='"+newyear+"-06'";
+		System.out.println("deletesql:"+deletesql);
+		stmt.execute(deletesql);
+		conn.commit();
 		try {
 			is = new FileInputStream(Path);
 			hssfWorkbook = new HSSFWorkbook(is);
@@ -117,39 +124,41 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 		
 		try {
 			
-			for (int i = 2; i < 42 ; i++) {
+			for (int i = 2; i < 28 ; i++) {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-				GregorianCalendar gc = new GregorianCalendar(2012, 06, 01);
-				for (int j = 2; j < 39; j++) {
-					if (j % 3 == 0) {
+				GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(year), 06, 01);
+				for (int j = 1; j < 38; j++) {
+					if (j % 3 == 2) {
 						map.put("月份", sdf.format(gc.getTime()));
 						map.put("直营卖场", hssfWorkbook.getSheetAt(0).getRow(i)
 								.getCell((short) j));
 						gc.add(2, 1);
 						continue;
 					}
-					if (j % 3 == 1) {
+					if (j % 3 == 0) {
 						map.put("经销商", hssfWorkbook.getSheetAt(0).getRow(i)
 								.getCell((short) j));
 						continue;
 					}
-					if (j % 3 == 2) {
-						if (j == 2) {
-							map.put("编码",
-									String.valueOf(hssfWorkbook.getSheetAt(0).getRow(i).getCell((short) 2)+ ""));
+					if (j % 3 == 1) {
+						if (j == 1) {
+							map.put("编码", hssfWorkbook.getSheetAt(0).getRow(i)
+									.getCell((short) 1));
 							continue;
 						} else {
-							map.put("合计", hssfWorkbook.getSheetAt(0).getRow(i).getCell((short) j));
+							map.put("合计", hssfWorkbook.getSheetAt(0).getRow(i)
+									.getCell((short) j));
+							
 						}
 					}
 					if (map.size() >= 5) {
-						if ("".equals(map.get("经销商").toString())||map.get("经销商").toString()==null) {
+						if ("".equals(map.get("经销商"))||map.get("经销商")==null) {
 							map.put("经销商", 0);
 						}
-						if ("".equals(map.get("直营卖场").toString())||map.get("直营卖场").toString()==null) {
+						if ("".equals(map.get("直营卖场"))||map.get("直营卖场")==null) {
 							map.put("直营卖场", 0);
 						}
-						if ("".equals(map.get("合计").toString())||map.get("合计").toString()==null) {
+						if ("".equals(map.get("合计"))||map.get("合计")==null) {
 							map.put("合计", 0);
 						}
 						
@@ -161,8 +170,8 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 								+  map.get("合计") + "')";
 						 // 设置不会自动提交
 						
-						stmt = conn.createStatement();
-						stmt.executeUpdate(sql);
+						stmt.addBatch(sql);
+						stmt.executeBatch();
 						
 					}
 
@@ -173,7 +182,7 @@ public class BudgetFyFileUploadServlet extends HttpServlet {
 		} catch (SQLException e) {
 			conn.rollback();
 			System.out.println("adfdsafeaasdfdasfdsa");
-			//e.printStackTrace();
+			e.printStackTrace();
 //			out.print(" <script type='javascript/text'>alert('注册失败');</script>");
 			out.print("<script language=\"javascript\" >");
 			out.print("window.alert(\"导入失败!\");");

@@ -46,6 +46,7 @@ public class BudgetCpmlFileUploadServlet extends HttpServlet{
 	
 			throws ServletException, IOException {
         String  area=request.getParameter("area");
+        String  year=request.getParameter("year");
 		resp.setContentType("text/html;charset=utf-8");
 		PrintWriter out = resp.getWriter();
 		FileItemFactory factory = new DiskFileItemFactory();
@@ -79,12 +80,12 @@ public class BudgetCpmlFileUploadServlet extends HttpServlet{
 			out.print("</script>");
 		}else{
 			try {
-				analyzingExcle(path,resp,area);
+				analyzingExcle(path,resp,area,year);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			out.print("<script language=\"javascript\" >");
-			out.print("window.alert(\"导入成功!！！\");");
+			out.print("window.alert(\"导入成功!\");");
 			out.print("window.close();");
 			out.print("opener.location.reload();");
 			out.print("</script>");
@@ -95,15 +96,21 @@ public class BudgetCpmlFileUploadServlet extends HttpServlet{
 		out.close();
 	}
 
-	private static void analyzingExcle(String Path,HttpServletResponse resp,String area) throws Exception  {
+	private static void analyzingExcle(String Path,HttpServletResponse resp,String area,String year) throws Exception  {
 		PrintWriter out = resp.getWriter();
 		System.out.println(Path);
 		String sql = "";
 		conn = DBOracleconn.getDBConn();
 		conn.setAutoCommit(false);
+		stmt = conn.createStatement();
 		Map map = new HashMap();
 		InputStream is = null;
 		HSSFWorkbook hssfWorkbook = null;
+		String newyear = String.valueOf((Integer.parseInt(year)+1));
+		String deletesql = "delete gy_CONTRIBUTION_SALES where area = '1002AV100000000CI6ZY' and mon>='"+year+"-07' and mon<='"+newyear+"-06'";
+		System.out.println("deletesql:"+deletesql);
+		stmt.execute(deletesql);
+		conn.commit();
 		try {
 			is = new FileInputStream(Path);
 			hssfWorkbook = new HSSFWorkbook(is);
@@ -157,8 +164,8 @@ public class BudgetCpmlFileUploadServlet extends HttpServlet{
 								+  map.get("合计") + "')";
 						 // 设置不会自动提交
 						
-						stmt = conn.createStatement();
-						stmt.executeUpdate(sql);
+						stmt.addBatch(sql);
+						stmt.executeBatch();
 						
 					}
 

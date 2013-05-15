@@ -52,16 +52,16 @@ public class UploadFileServlet extends HttpServlet {
 			File FileUploadDir=new File(path);
 			File FileUploadDir1=new File(tpath);
 			if(!FileUploadDir.exists())
-			   FileUploadDir.mkdir(); //Éú³ÉÉÏ´«ÎÄ¼şµÄÄ¿Â¼
+			   FileUploadDir.mkdir(); //ç”Ÿæˆä¸Šä¼ æ–‡ä»¶çš„ç›®å½•
 			if(!FileUploadDir1.exists())
 			   FileUploadDir1.mkdir();
-			if(tendtypeid != null || tendtypeid != ""){
+			if(null !=  tendtypeid || !"".equals(tendtypeid)){
 			  path += "/"+tendtypeid;
 			  tpath = path +"/temp/";
 			  FileUploadDir=new File(path);
 			  FileUploadDir1=new File(tpath);
 				if(!FileUploadDir.exists())
-				   FileUploadDir.mkdir(); //Éú³ÉÉÏ´«ÎÄ¼şµÄÄ¿Â¼
+				   FileUploadDir.mkdir(); //ç”Ÿæˆä¸Šä¼ æ–‡ä»¶çš„ç›®å½•
 				if(!FileUploadDir1.exists())
 				   FileUploadDir1.mkdir();
 			}
@@ -69,18 +69,18 @@ public class UploadFileServlet extends HttpServlet {
 			DiskFileUpload fu = new DiskFileUpload();
 			fu.setHeaderEncoding("gb2312");
 			resp.setCharacterEncoding("gb2312");
-		    fu.setSizeMax(100*1024*1024);// ÉèÖÃ×î´óÎÄ¼ş³ß´ç£¬ÕâÀïÊÇ1M
-		    fu.setSizeThreshold(4096);// ÉèÖÃ»º³åÇø´óĞ¡£¬ÕâÀïÊÇ4kb
+		    fu.setSizeMax(100*1024*1024);// è®¾ç½®æœ€å¤§æ–‡ä»¶å°ºå¯¸ï¼Œè¿™é‡Œæ˜¯1M
+		    fu.setSizeThreshold(4096);// è®¾ç½®ç¼“å†²åŒºå¤§å°ï¼Œè¿™é‡Œæ˜¯4kb
 		    fu.setRepositoryPath(tempPath);												
-			  // ÉèÖÃÁÙÊ±Ä¿Â¼£º
+			  // è®¾ç½®ä¸´æ—¶ç›®å½•ï¼š
 		      List fileItems = fu.parseRequest(request);
-			  //System.out.println(fileItems);// µÃµ½ËùÓĞµÄÎÄ¼ş£º
+			  //System.out.println(fileItems);// å¾—åˆ°æ‰€æœ‰çš„æ–‡ä»¶ï¼š
 		      Iterator iter = fileItems.iterator();
 		      ArrayList file = new ArrayList();
 		      ArrayList size1 = new ArrayList();
-		      while (iter.hasNext()) {			// ÒÀ´Î´¦ÀíÃ¿Ò»¸öÎÄ¼ş£º
+		      while (iter.hasNext()) {			// ä¾æ¬¡å¤„ç†æ¯ä¸€ä¸ªæ–‡ä»¶ï¼š
 		        FileItem item = (FileItem) iter.next();	
-				//ºöÂÔÆäËû²»ÊÇÎÄ¼şÓòµÄËùÓĞ±íµ¥ĞÅÏ¢
+				//å¿½ç•¥å…¶ä»–ä¸æ˜¯æ–‡ä»¶åŸŸçš„æ‰€æœ‰è¡¨å•ä¿¡æ¯
 		        if (!item.isFormField()) {
 		          names = item.getName();
 		          long size = item.getSize();
@@ -96,14 +96,17 @@ public class UploadFileServlet extends HttpServlet {
 		          //size1.add(s);
 		        }
 		       }
-		      if(tendtypeid != null || tendtypeid != ""){
+		      if(null !=  tendtypeid || !"".equals(tendtypeid)){
 		    	  file1 = syspath+type+"/"+tendtypeid+"/"+file.get(0);
 		      }else{
 		    	  file1 = syspath+type+"/"+file.get(0);
 		      }
+		      System.out.println("ffffffffffffffffffffffffff:"+file1);
+		      System.out.println("window.opener.document."+formname+"."+picurl+".value='"+file1+"'");
 		      out.print("<script language=\"javascript\" >window.opener.document."+formname+"."+picurl+".value='"+file1+"'</script>");
 		      out.print("<script language=\"javascript\" >");
-		      out.print("window.alert(\"ÎÄ¼şÉÏ´«³É¹¦!\");");
+		      out.print("window.alert(\"æ–‡ä»¶ä¸Šä¼ æˆåŠŸ!\");");
+		      //out.print("window.alert("+file1+");");
 		      out.print("window.close();");
 		      out.print("</script>");
 		}catch(Exception e){
