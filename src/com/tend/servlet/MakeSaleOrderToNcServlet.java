@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,52 +35,44 @@ import org.dom4j.Element;
  *
  */
 public class MakeSaleOrderToNcServlet extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
 	Logger log = Logger.getLogger(MakeSaleOrderToNcServlet.class);
 	private static List<String> returnMsg = new ArrayList<String>();
+	String toncsaleorder = "";
 	public MakeSaleOrderToNcServlet() {
+			
 	}
-
 	public void init() throws ServletException {
-//		ServletConfig config = getServletConfig();
-//		System.out.println("server1.....................:" + server + "...");
-//		if (server == null){
-//			server = "http://100.100.1.141:9080/service/XChangeServlet?account=test882";
-//		}
-//		System.out.println("server2:" + server + "...");
+		System.out.println("生成销售订单程序初始化！");
+		ServletConfig config = getServletConfig();
+		System.out.println(config.getInitParameter("toncsaleorder"));
+		if (config.getInitParameter("toncsaleorder") != null) {
+			toncsaleorder = config.getInitParameter("toncsaleorder");
+		}
+		System.out.println("从servletConfig中获取配置的参数");
 	}
-
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		String qryDoc = "";
 		String djh = "";
 		String khid = "";
 		String ncserver = "";
 		request.setCharacterEncoding("GBK");
-		System.out.println("000000:"+request.getParameter("ncserver"));
 		try {
-			djh = request.getParameter("djh") != null ? request.getParameter(
-					"djh").toString() : "";
-			khid = request.getParameter("khid") != null ? request.getParameter(
-					"khid").toString() : "";
-			ncserver = request.getParameter("ncserver") != null ? request.getParameter(
-					"ncserver").toString() : "";
+			djh = request.getParameter("djh") != null ? request.getParameter("djh").toString() : "";
+			khid = request.getParameter("khid") != null ? request.getParameter("khid").toString() : "";
+			ncserver = request.getParameter("ncserver") != null ? request.getParameter("ncserver").toString() : "";
 					
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("单据号为：" + djh);
-		System.out.println("客户ID为：" + khid);
-		System.out.println("NC交互路径为：" + ncserver);
 
 		// qryDoc = getServletConfig().getServletContext().getRealPath("/")+"synear\\makeorder.nc";
 		if (request.getPathInfo() == null) {
-			qryDoc = getServletConfig().getServletContext().getRealPath(
-					request.getServletPath());
+			qryDoc = getServletConfig().getServletContext().getRealPath(request.getServletPath());
 		} else {
 			qryDoc = request.getPathTranslated();
 		}
-		System.out.println("qryDoc的值为：" + qryDoc);
 		try {
 			System.out.println(FunctionLib.openFile(qryDoc));
 			WebApp app = new WebApp(FunctionLib.openFile(qryDoc));
@@ -91,8 +84,7 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			InputStream in = null;
 			String msg = null;
 			ve.init();
-			ToNcEngine mainMod = new ToNcEngine(request, response, app,
-					context, getServletConfig());
+			ToNcEngine mainMod = new ToNcEngine(request, response, app, context, getServletConfig());
 			// 处理用户请求
 			Vector vsqls = app.getSqls();
 			System.out.println("size:" + vsqls.size());
@@ -109,13 +101,9 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			Template t = ve.getTemplate(app.getTemplate());
 			StringWriter sw = new StringWriter();
 			t.merge(context, sw);
-			System.out.println("aaaaaaaa" + sw.toString());
-			System.out.println("ccccccccc");
+			System.out.println("生成后的Vm生成后的文件内容：" + sw.toString());
 			URL realURL = new URL(ncserver);
-			System.out.println("7777777"+ncserver);
-			HttpURLConnection connection = (HttpURLConnection) realURL
-					.openConnection();
-			System.out.println("gggggggg");
+			HttpURLConnection connection = (HttpURLConnection) realURL.openConnection();
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-type", "text/xml");
 			connection.setRequestMethod("POST");
@@ -128,7 +116,6 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			msg = new String(b, "UTF-8");
 			// System.out.println("返回信息:"+msg);
 			Document resDoc = DocumentHelper.parseText(msg);
-			System.out.println("qqqqqqqqq");
 			List resCode_list = resDoc
 					.selectNodes("ufinterface/sendresult/resultcode");
 			List resDes_list = resDoc
@@ -145,7 +132,6 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			}
 			// 从回执信息中获取错误信息编号
 			List<String> resCodeList = new ArrayList<String>();
-			System.out.println("ttttttt");
 			for (Object obj : resCode_list) {
 				Element resCode = (Element) obj;
 				String resCode_value = resCode.getText();
@@ -166,7 +152,6 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 				}
 			} else {
 				if (!app.getFailMsg().equals(""))
-					System.out.println("mmmmmmm");
 					invaliddoc_value = app.getFailMsg();
 				response.getWriter().write("-1"); // 创建的结果
 				System.out.println("失败1");
