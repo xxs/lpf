@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -53,6 +54,8 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 		System.out.println("从servletConfig中获取配置的参数");
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		System.out.println("执行了生成NC订单的操作，此操作来自分支客户生成订单的模块！！！");
+		PrintWriter out = response.getWriter();
 		String qryDoc = "";
 		String djh = "";
 		String khid = "";
@@ -73,6 +76,7 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 		} else {
 			qryDoc = request.getPathTranslated();
 		}
+		System.out.println(qryDoc);
 		try {
 			System.out.println(FunctionLib.openFile(qryDoc));
 			WebApp app = new WebApp(FunctionLib.openFile(qryDoc));
@@ -142,24 +146,25 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 				}
 			}
 			if (resCodeList.size() == 0) {
-				if (app.getUrl().equals("qbTonc")) {
-					System.out.println("成功");
-					response.getWriter().write("0"); // 成功
-				} else {
-					if (!app.getSuccessMsg().equals(""))
-						invaliddoc_value = app.getSuccessMsg();
-					System.out.println("成功2");
-				}
+				out.print("<script language=\"javascript\" >");
+				out.print("window.alert(\"导入成功!\");");
+				out.print("window.close();");
+	     		out.print("opener.location.reload();");
+				out.print("</script>");
 			} else {
-				if (!app.getFailMsg().equals(""))
-					invaliddoc_value = app.getFailMsg();
-				response.getWriter().write("-1"); // 创建的结果
-				System.out.println("失败1");
+				out.print("<script language=\"javascript\" >");
+				out.print("window.alert(\"导入失败!出现错误\");");
+				out.print("window.close();");
+	     		out.print("opener.location.reload();");
+				out.print("</script>");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.getWriter().write("-999"); // 出现错误
-			System.out.println("失败，-999");
+			out.print("<script language=\"javascript\" >");
+			out.print("window.alert(\"导入失败!出现异常\");");
+			out.print("window.close();");
+     		out.print("opener.location.reload();");
+			out.print("</script>");
 		}
 	}
 
