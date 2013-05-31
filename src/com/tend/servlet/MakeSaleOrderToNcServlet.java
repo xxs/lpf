@@ -40,21 +40,40 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	Logger log = Logger.getLogger(MakeSaleOrderToNcServlet.class);
 	private static List<String> returnMsg = new ArrayList<String>();
-	String toncsaleorder = "";
+	String toncsaleorder = "";//通信NC的url地址
+	
+	String pk_corp="";//公司主键
+	String pk_calbody="";//库存组织主键
+	String bodyname="";//库存组织名称
+	String pk_cubasdoc="";//客商主键
+	String pk_cumandoc="";//客商管理主键
+	String custname="";//客商名称
+	String custcode="";//客商编码
+	String pk_currtype1="";//币种主键
+	String currtypename="";//币种名称
+	String deptname="";//地区名称
+	String psnname="";//业务员
+	String areaclname="";//地区名称
+	String addrname="";//送货地址
+	Double feenum=0.00;//可用量
+	Double feenum2=0.00;//占用量
+	String pk_salestru="";//销售组织主键
+	String vsalestruname="";//销售组织名称
+	
 	public MakeSaleOrderToNcServlet() {
 			
 	}
 	public void init() throws ServletException {
-		System.out.println("生成销售订单程序初始化！");
+		System.out.println("生成销售订单程序初始化参数!");
 		ServletConfig config = getServletConfig();
 		System.out.println(config.getInitParameter("toncsaleorder"));
 		if (config.getInitParameter("toncsaleorder") != null) {
 			toncsaleorder = config.getInitParameter("toncsaleorder");
 		}
-		System.out.println("从servletConfig中获取配置的参数");
+		System.out.println("生成销售订单程序初始化参数完成!");
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		System.out.println("执行了生成NC订单的操作，此操作来自分支客户生成订单的模块！！！");
+		System.out.println("执行了生成NC订单的操作，此操作来自分支客户生成订单的模块!!!");
 		PrintWriter out = response.getWriter();
 		String qryDoc = "";
 		String djh = "";
