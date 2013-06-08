@@ -57,14 +57,17 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
+		//设置request的请求编码方式
+		request.setCharacterEncoding("GB2312");
 		response.setContentType("text/html; charset=UTF-8");
 		// 以下两句为取消在本地的缓存
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Pragma", "no-cache");
-		
 		System.out.println("执行了生成NC订单的操作，此操作来自分支客户生成订单的模块!!!");
 		PrintWriter out = response.getWriter();
 		String qryDoc = "";// 访问mso的文件路径
+		
+		System.out.println("ooooooooooooo:"+request.getParameter("addrname"));
 //		String[] rowlist = request.getParameterValues("rowlist");
 //		for (int i = 0; i < rowlist.length; i++) {
 //			System.out.println("第"+i+"行的行号为："+rowlist[i]);
@@ -134,11 +137,14 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			returnMsg.clear();
 			for (Object obj : resDes_list) {
 				Element invaliddoc = (Element) obj;
-				invaliddoc_value = invaliddoc.getText();
+				//System.out.println("未处理前："+invaliddoc.getText());
+				invaliddoc_value = invaliddoc.getText().replace("\n", "");
+				//invaliddoc_value = invaliddoc_value.replace("\n", "");
 				System.out.println("返回信息:" + invaliddoc_value);
 				// 将回执信息赋值给静态变量returnMsg
 				returnMsg.add(invaliddoc_value);
 			}
+			invaliddoc_value = invaliddoc_value.replace("\n", "");
 			// 从回执信息中获取错误信息编号
 			List<String> resCodeList = new ArrayList<String>();
 			for (Object obj : resCode_list) {
@@ -152,19 +158,19 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 			}
 			if (resCodeList.size() == 0) {
 				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"123成功!\");");
+				out.print("window.alert(\"订单保存成功!\");");
 				out.print("window.close();");
 				out.print("</script>");
 			} else {
 				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"222失败!"+invaliddoc_value+"\");");
+				out.print("window.alert(\"订单保存失败失败!"+invaliddoc_value+"\");");
 				out.print("window.close();");
 				out.print("</script>");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			out.print("<script language=\"javascript\" >");
-			out.print("window.alert(\"333异常失败!\");");
+			out.print("window.alert(\"出现异常,订单保存失败!\");");
 			out.print("window.close();");
 			out.print("</script>");
 		}
