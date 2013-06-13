@@ -157,22 +157,13 @@ public class MakeSaleOrderToNcServlet extends HttpServlet {
 				}
 			}
 			if (resCodeList.size() == 0) {
-				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"订单保存成功!\");");
-				out.print("window.close();");
-				out.print("</script>");
+				out.print("订单保存成功!");
 			} else {
-				out.print("<script language=\"javascript\" >");
-				out.print("window.alert(\"订单保存失败失败!"+invaliddoc_value+"\");");
-				out.print("window.close();");
-				out.print("</script>");
+				out.print("订单保存失败失败!"+invaliddoc_value+"");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			out.print("<script language=\"javascript\" >");
-			out.print("window.alert(\"出现异常,订单保存失败!\");");
-			out.print("window.close();");
-			out.print("</script>");
+			out.print("出现异常,订单保存失败!");
 		}
 	}
 
