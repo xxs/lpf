@@ -7,6 +7,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 预订单增量抽取
  * 
@@ -15,6 +18,7 @@ import java.util.Date;
  */
 public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 
+	private static Log log=LogFactory.getLog(DayZLNCtoBQSenderBySoPreorderB.class);
 	public DayZLNCtoBQSenderBySoPreorderB() {
 		System.out.println("预订单增量抽取-- 无参构造函数");
 	}
@@ -58,7 +62,8 @@ public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable 
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("预订单辅表开始抽取增量数据................");
-		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
+		String begindate = new Timestamp(new Date().getTime()).toString();
+		System.out.println("开始时间为"+begindate);
 		try {
 			System.out.println("预订单辅表获取连接");
 			conNC = this.getConForNC();
@@ -341,8 +346,9 @@ public class DayZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable 
 				}
 				tm++;
 			}
+			log.info("预订单辅表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 			System.out.println("预订单辅表增量数据抽取完毕");
-			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
+			System.out.println("预订单辅表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

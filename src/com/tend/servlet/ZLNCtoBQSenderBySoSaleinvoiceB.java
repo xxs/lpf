@@ -23,7 +23,8 @@ public class ZLNCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable 
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-04","2013-01-07",1);
+			//DateLoop("2012-10-15", "2013-01-04","2013-01-07",1);
+			DateLoop("2013-01-01", "2013-04-01","2013-06-21",1);
 			System.out.println("发票辅表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票辅表抽取增量数据异常");
@@ -151,7 +152,8 @@ public class ZLNCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable 
 			sql.append("  NTAXPRICE               ,");
 			sql.append("  NTAXRATE                ,");
 			sql.append("  PK_CORP                 ,");
-			sql.append("  TS                       ");
+			sql.append("  TS                      ,");
+			sql.append("  DR                       ");
 			sql.append("  from so_saleinvoice_b svb");
 			sql.append("  where svb.dr=0 and svb.csaleid in (select sv.csaleid from so_saleinvoice sv ");
 			sql.append("  where sv.dbilldate >= '").append(dbilldate+"'");
@@ -250,7 +252,8 @@ public class ZLNCtoBQSenderBySoSaleinvoiceB extends BaseDao implements Runnable 
 				insetSql.append("  NTAXPRICE               ,");
 				insetSql.append("  NTAXRATE                ,");
 				insetSql.append("  PK_CORP                 ,");
-				insetSql.append("  TS                 ) values (        ");
+				insetSql.append("  TS                	   ,");
+				insetSql.append("  DR                 ) values (        ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

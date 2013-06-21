@@ -7,6 +7,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 发票主表 增量增量数据抽取
  * 
@@ -16,6 +19,7 @@ import java.util.Date;
 public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 		Runnable {
 
+	private static Log log=LogFactory.getLog(DayZLNCtoBQSenderBySoSaleinvoice.class);
 	public DayZLNCtoBQSenderBySoSaleinvoice() {
 		System.out.println("发票主表增量数据抽--无参构造函数");
 	}
@@ -59,7 +63,8 @@ public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("发票主表开始抽取增量数据................");
-		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
+		String begindate = new Timestamp(new Date().getTime()).toString();
+		System.out.println("开始时间为"+begindate);
 		try {
 			System.out.println("发票主表获取连接");
 			conNC = this.getConForNC();
@@ -277,8 +282,9 @@ public class DayZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements
 				}
 				tm++;
 			}
+			log.info("发票主表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 			System.out.println("发票主表增量数据抽取完毕");
-			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
+			System.out.println("发票主表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

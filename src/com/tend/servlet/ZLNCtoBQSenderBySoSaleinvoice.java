@@ -7,6 +7,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 /**
  * 发票主表 增量增量数据抽取
  * @author Administrator
@@ -23,7 +26,7 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-04","2013-01-07",2);
+			DateLoop("2013-01-01", "2013-04-01","2013-06-21",2);
 			System.out.println("发票主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票主表抽取增量数据异常");
@@ -144,7 +147,8 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 			sql.append("  VRECEIPTCODE       ,");
 			sql.append("  VRECEIVEADDRESS    ,");
 			sql.append("  BISSEND            ,");
-			sql.append("  NKPMNY                  ");
+			sql.append("  NKPMNY             ,");
+			sql.append("  DR                  ");
 			sql.append("  from so_saleinvoice sv");
 			sql.append("  where sv.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and sv.ts >= '").append(ts+"'");
@@ -234,6 +238,7 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  BISSEND            ,");
+				insetSql.append("  DR                 ,");
 				insetSql.append("  NKPMNY           ) values (       ");
 					for (int i = 1; i <= resultcount; i++) {
 						

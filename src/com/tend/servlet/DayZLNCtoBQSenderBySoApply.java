@@ -7,6 +7,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 退货申请单主表增量数据抽取
  * 
@@ -15,6 +18,7 @@ import java.util.Date;
  */
 public class DayZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 
+	private static Log log=LogFactory.getLog(DayZLNCtoBQSenderBySoApply.class);
 	public DayZLNCtoBQSenderBySoApply() {
 		System.out.println("退货申请单主表增量数据抽取--无参构造函数");
 	}
@@ -58,7 +62,8 @@ public class DayZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 		PreparedStatement pstBQ = null;
 		ResultSet restBQ = null;
 		System.out.println("退货申请单主取数据表抽................");
-		System.out.println("开始时间为" + new Timestamp(new Date().getTime()));
+		String begindate = new Timestamp(new Date().getTime()).toString();
+		System.out.println("开始时间为"+begindate);
 		try {
 			System.out.println("退货申请单主表获取连接");
 			conNC = this.getConForNC();
@@ -243,8 +248,9 @@ public class DayZLNCtoBQSenderBySoApply extends BaseDao implements Runnable {
 				}
 				tm++;
 			}
+			log.info("退货申请单主表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 			System.out.println("退货申请单主表增量数据抽取完毕");
-			System.out.println("结束时间为" + new Timestamp(new Date().getTime()));
+			System.out.println("退货申请单主表增量数据抽取完毕,查询NC并插入BQ数据库的行数为："+tm+"。开始时间为："+begindate+";结束时间为"+new Timestamp(new Date().getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
