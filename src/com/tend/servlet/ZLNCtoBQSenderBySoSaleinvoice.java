@@ -7,9 +7,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 /**
  * 发票主表 增量增量数据抽取
  * @author Administrator
@@ -26,7 +23,7 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2013-01-01", "2013-04-01","2013-06-21",2);
+			DateLoop("2013-01-01", "2013-06-01","2013-06-27",2);
 			System.out.println("发票主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("发票主表抽取增量数据异常");
@@ -237,8 +234,8 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
 				insetSql.append("  BISSEND            ,");
-				insetSql.append("  DR                 ,");
-				insetSql.append("  NKPMNY           ) values (       ");
+				insetSql.append("  NKPMNY             ,");
+				insetSql.append("  DR           ) values (       ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
