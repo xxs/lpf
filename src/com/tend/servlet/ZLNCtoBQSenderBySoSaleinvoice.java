@@ -153,7 +153,6 @@ public class ZLNCtoBQSenderBySoSaleinvoice extends BaseDao implements Runnable {
 			sql.append("  where sv.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and sv.ts >= '").append(ts+"'");
 			sql.append("  and sv.ts <= '").append(ts2+"'");
-			sql.append("  and sv.dr=0");
 			sql.append("  and sv.pk_corp != '1020'");
 			sql.append("  and sv.pk_corp != '1021'");
 			sql.append("  and sv.pk_corp != '1023'");

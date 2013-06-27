@@ -10,26 +10,30 @@ import javax.servlet.http.HttpServlet;
 public class ZLNCtoBQServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private ZLNCtoBQSenderByArapDjzb arapDjzb;
+	private ZLNCtoBQSenderByArapDjfb arapDjfb;
 //	private ZLNCtoBQSenderBySoSale soSale;
 //	private ZLNCtoBQSenderBySoSaleorderB soSaleorderB; 
 //	private ZLNCtoBQSenderBySoApply soApply;
 //	private ZLNCtoBQSenderBySoApplyB soApplyB;
 //	private ZLNCtoBQSenderBySoPreorder soPreorder;
 //	private ZLNCtoBQSenderBySoPreorderB soPreorderB;
-	private ZLNCtoBQSenderBySoSaleinvoice soSaleinvoice;
-	private ZLNCtoBQSenderBySoSaleinvoiceB soSaleinvoiceB;
+//	private ZLNCtoBQSenderBySoSaleinvoice soSaleinvoice;
+//	private ZLNCtoBQSenderBySoSaleinvoiceB soSaleinvoiceB;
 //	private ZLNCtoBQSenderByIcGeneralB icGeneralB;
 //	private ZLNCtoBQSenderByIcGeneralH icGeneralH;
 //	private ZLNCtoBQSenderByIcWastagebill wastagebill;
 //	private ZLNCtoBQSenderByIcWastagebillB wastagebillB;
+	private Thread TarapDjzb;
+	private Thread TarapDjfb;
 //	private Thread TsoSale;
 //	private Thread TsoSaleorderB;
 //	private Thread TsoApply;
 //	private Thread TsoApplyB;
 //	private Thread TsoPreorder;
 //	private Thread TsoPreorderB;
-	private Thread TsoSaleinvoice;
-	private Thread TsoSaleinvoiceB;
+//	private Thread TsoSaleinvoice;
+//	private Thread TsoSaleinvoiceB;
 //	private Thread TicGeneralB;
 //	private Thread TicGeneralH;
 //	private Thread Twastagebill;
@@ -40,18 +44,24 @@ public class ZLNCtoBQServlet extends HttpServlet {
 	public void destroy() {
 		// sender.stop();
 		try {
+			TarapDjzb.join(1000L);
+			TarapDjfb.join(1000L);
 //			TsoSale.join(1000L);
 //			TsoSaleorderB.join(1000L);
 //			TsoApply.join(1000L);
 //			TsoApplyB.join(1000L);
 //			TsoPreorder.join(1000L);
 //			TsoPreorderB.join(1000L);
-			TsoSaleinvoice.join(1000L);
-			TsoSaleinvoiceB.join(1000L);
+//			TsoSaleinvoice.join(1000L);
+//			TsoSaleinvoiceB.join(1000L);
 //			TicGeneralB.join(1000L);
 //			TicGeneralH.join(1000L);
 //			Twastagebill.join(1000L);
 //			TwastagebillB.join(1000L);
+			if (TarapDjzb.isAlive())
+				System.out.println("抽取单据主表增量NC数据到BQ数据仓库的线程未停止。");
+			if (TarapDjfb.isAlive())
+				System.out.println("抽取单据辅表增量NC数据到BQ数据仓库的线程未停止。");
 //			if (TsoSale.isAlive())
 //				System.out.println("抽取订单主表增量NC数据到BQ数据仓库的线程未停止。");
 //			if (TsoSaleorderB.isAlive())
@@ -81,14 +91,16 @@ public class ZLNCtoBQServlet extends HttpServlet {
 	}
 
 	public void init() throws ServletException {
+		arapDjzb = new ZLNCtoBQSenderByArapDjzb();
+		arapDjfb = new ZLNCtoBQSenderByArapDjfb();
 //		soSale = new ZLNCtoBQSenderBySoSale();
 //		soSaleorderB = new ZLNCtoBQSenderBySoSaleorderB();
 //		soApply = new ZLNCtoBQSenderBySoApply();
 //		soApplyB = new ZLNCtoBQSenderBySoApplyB();
 //		soPreorder = new ZLNCtoBQSenderBySoPreorder();
 //		soPreorderB = new ZLNCtoBQSenderBySoPreorderB();
-		soSaleinvoice = new ZLNCtoBQSenderBySoSaleinvoice();
-		soSaleinvoiceB = new ZLNCtoBQSenderBySoSaleinvoiceB();
+//		soSaleinvoice = new ZLNCtoBQSenderBySoSaleinvoice();
+//		soSaleinvoiceB = new ZLNCtoBQSenderBySoSaleinvoiceB();
 //		icGeneralB = new ZLNCtoBQSenderByIcGeneralB();
 //		icGeneralH = new ZLNCtoBQSenderByIcGeneralH();
 //		wastagebill = new ZLNCtoBQSenderByIcWastagebill();
@@ -96,27 +108,31 @@ public class ZLNCtoBQServlet extends HttpServlet {
 		System.out.println("程序初始化！");
 		System.out.println("抽取增量NC数据到BQ数据仓库启动线程！");
 		
+		TarapDjzb = new Thread(arapDjzb);
+		TarapDjfb = new Thread(arapDjfb);
 //		TsoSale = new Thread(soSale);
 //		TsoSaleorderB = new Thread(soSaleorderB);
 //		TsoApply = new Thread(soApply);
 //		TsoApplyB = new Thread(soApplyB);
 //		TsoPreorder = new Thread(soPreorder);
 //		TsoPreorderB = new Thread(soPreorderB);
-		TsoSaleinvoice = new Thread(soSaleinvoice);
-		TsoSaleinvoiceB = new Thread(soSaleinvoiceB);
+//		TsoSaleinvoice = new Thread(soSaleinvoice);
+//		TsoSaleinvoiceB = new Thread(soSaleinvoiceB);
 //		TicGeneralB = new Thread(icGeneralB);
 //		TicGeneralH = new Thread(icGeneralH);
 //		Twastagebill = new Thread(wastagebill);
 //		TwastagebillB = new Thread(wastagebillB);
 		
+		TarapDjzb.start();
+		TarapDjfb.start();
 //		TsoSale.start();
 //		TsoSaleorderB.start(); 
 //		TsoApply.start();
 //		TsoApplyB.start();
 //		TsoPreorder.start();
 //		TsoPreorderB.start();
-		TsoSaleinvoice.start();
-		TsoSaleinvoiceB.start();
+//		TsoSaleinvoice.start();
+//		TsoSaleinvoiceB.start();
 //		TicGeneralB.start();
 //		TicGeneralH.start();
 //		Twastagebill.start();

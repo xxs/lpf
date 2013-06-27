@@ -196,12 +196,11 @@ public class ZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  VSERIALCODE             ,");
 			sql.append("  VSOURCECODE                                   ");
 			sql.append("  from so_apply_b ayb");
-			sql.append("  where ayb.dr=0 and ayb.pk_apply in (select ay.pk_apply");
+			sql.append("  where ayb.pk_apply in (select ay.pk_apply");
 			sql.append("  from so_apply ay");
 			sql.append("  where ay.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and ay.ts >= '").append(ts+"'");
 			sql.append("  and ay.ts <= '").append(ts2+"'");
-			sql.append("  and ay.dr=0");
 			sql.append("  and ay.pk_corp != '1020'");
 			sql.append("  and ay.pk_corp != '1021'");
 			sql.append("  and ay.pk_corp != '1023'");

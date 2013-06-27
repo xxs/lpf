@@ -179,12 +179,11 @@ public class ZLNCtoBQSenderBySoPreorderB extends BaseDao implements Runnable {
 			sql.append("  VRETURNMODE        ,");
 			sql.append("  VSOURCECODE        ");
 			sql.append("  FROM  so_preorder_b pb");
-			sql.append("  where pb.dr=0 and pb.pk_preorder in (select p.pk_preorder");
+			sql.append("  where pb.pk_preorder in (select p.pk_preorder");
 			sql.append("  from so_preorder p");
 			sql.append("  where p.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and p.ts>= '").append(ts+"'");
-			sql.append("  and p.ts <= '").append(ts2+"'");
-			sql.append("  and p.dr=0 ) ");
+			sql.append("  and p.ts <= '").append(ts2+"')");
 			
 			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());

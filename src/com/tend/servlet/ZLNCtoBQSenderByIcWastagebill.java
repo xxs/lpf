@@ -134,7 +134,6 @@ public class ZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 			sql.append("  where w.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and w.ts >= '").append(ts+"'");
 			sql.append("  and w.ts <= '").append(ts2+"'");
-			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
 			sql.append("  and w.pk_corp != '1023'");

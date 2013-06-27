@@ -159,7 +159,6 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 			sql.append("  where s.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and s.ts >= '").append(ts+"'");
 			sql.append("  and s.ts <= '").append(ts2+"'");
-			sql.append("  and s.dr=0		");
 			sql.append("  and s.pk_corp != '1020'	");
 			sql.append("  and s.pk_corp != '1021'	");
 			sql.append("  and s.pk_corp != '1023'	");

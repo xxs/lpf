@@ -194,12 +194,11 @@ public class ZLNCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable 
 			sql.append("  VSOURCEBILLCODE      ,");
 			sql.append("  VSOURCEROWNO                              ");
 			sql.append("  from ic_wastagebill_b wb");
-			sql.append("  where wb.dr=0 and wb.cwastagebillid in (select w.cwastagebillid");
+			sql.append("  where wb.cwastagebillid in (select w.cwastagebillid");
 			sql.append("      from ic_wastagebill w");
 			sql.append("      where w.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and w.ts >= '").append(ts+"'");
 			sql.append("  and w.ts <= '").append(ts2+"'");
-			sql.append("  and w.dr=0");
 			sql.append("  and w.pk_corp != '1020'");
 			sql.append("  and w.pk_corp != '1021'");
 			sql.append("  and w.pk_corp != '1023'");

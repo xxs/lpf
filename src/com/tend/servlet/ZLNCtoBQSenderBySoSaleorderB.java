@@ -172,11 +172,10 @@ public class ZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 			sql.append("  VEDITREASON             ,");
 			sql.append("  VRECEIVEADDRESS           ");
 			sql.append("  from so_saleorder_b sb");
-			sql.append("  where sb.dr=0 and sb.csaleid in (select s.csaleid from so_sale s ");
+			sql.append("  where sb.csaleid in (select s.csaleid from so_sale s ");
 			sql.append("  where s.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and s.ts >= '").append(ts+"'");
 			sql.append("  and s.ts <= '").append(ts2+"'");
-			sql.append("  and s.dr=0");
 			sql.append("  and s.pk_corp != '1020'");
 			sql.append("  and s.pk_corp != '1021'");
 			sql.append("  and s.pk_corp != '1023'");

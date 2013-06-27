@@ -249,11 +249,10 @@ public class ZLNCtoBQSenderByIcGeneralB extends BaseDao implements Runnable {
 			sql.append("  VUSERDEF9           ,");
 			sql.append("  VVEHICLECODE        ");
 			sql.append("  from ic_general_b gb         ");
-			sql.append("  where gb.dr=0 and gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
+			sql.append("  where gb.cgeneralhid in (select gh.cgeneralhid from ic_general_h gh");
 			sql.append("  where gh.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and gh.ts >= '").append(ts+"'");
 			sql.append("  and gh.ts <= '").append(ts2+"'");
-			sql.append("  and gh.dr=0                  ");
 			sql.append("  and gh.pk_corp != '1020'     ");
 			sql.append("  and gh.pk_corp != '1021'     ");
 			sql.append("  and gh.pk_corp != '1023'     ");

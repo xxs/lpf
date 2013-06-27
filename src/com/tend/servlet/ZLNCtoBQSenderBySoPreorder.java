@@ -130,7 +130,6 @@ public class ZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 			sql.append("	where p.dbilldate >= '").append(dbilldate+"'");
 			sql.append("	and p.ts >= '").append(ts+"'");
 			sql.append("	and p.ts <= '").append(ts2+"'");
-			sql.append("	and p.dr=0");
 			
 			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
