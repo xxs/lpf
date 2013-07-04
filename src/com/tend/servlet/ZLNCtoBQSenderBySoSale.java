@@ -23,7 +23,7 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-04","2013-01-07",2);
+			DateLoop("2013-01-01", "2013-04-01","2013-07-04",2);
 			System.out.println("订单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("订单主表抽取增量数据异常");
@@ -154,7 +154,8 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 			sql.append("  VNOTE              ,");
 			sql.append("  VRECEIPTCODE       ,");
 			sql.append("  VRECEIVEADDRESS    ,");
-			sql.append("  BISSEND            ");
+			sql.append("  BISSEND            ,");
+			sql.append("  DR            ");
 			sql.append("  from so_sale s");
 			sql.append("  where s.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and s.ts >= '").append(ts+"'");
@@ -254,7 +255,8 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 				insetSql.append("  VNOTE              ,");
 				insetSql.append("  VRECEIPTCODE       ,");
 				insetSql.append("  VRECEIVEADDRESS    ,");
-				insetSql.append("  BISSEND        ) values (    ");
+				insetSql.append("  BISSEND            ,");
+				insetSql.append("  DR        ) values (    ");
 					for (int i = 1; i <= resultcount; i++) {
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
 							if(null == restNC.getString(i) || restNC.getString(i).isEmpty()){

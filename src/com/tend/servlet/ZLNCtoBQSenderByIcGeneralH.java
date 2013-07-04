@@ -147,7 +147,8 @@ public class ZLNCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 			sql.append("		  VUSERDEF6         ,           ");
 			sql.append("		  VUSERDEF7         ,           ");
 			sql.append("		  VUSERDEF8         ,           ");
-			sql.append("		  VUSERDEF9                     ");
+			sql.append("		  VUSERDEF9         ,           ");
+			sql.append("		  DR                     ");
 			sql.append("		  from ic_general_h gh          ");
 			sql.append("		  where gh.dbilldate >= '").append(dbilldate+"'");
 			sql.append("		  and gh.ts >= '").append(ts+"'");
@@ -238,7 +239,8 @@ public class ZLNCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 				insetSql.append("	  VUSERDEF6         ,                        ");
 				insetSql.append("	  VUSERDEF7         ,                        ");
 				insetSql.append("	  VUSERDEF8         ,                        ");
-				insetSql.append("	  VUSERDEF9          ) values (              ");
+				insetSql.append("	  VUSERDEF9         ,			             ");
+				insetSql.append("	  DR          ) values (              ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

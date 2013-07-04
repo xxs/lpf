@@ -23,7 +23,7 @@ public class ZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2012-10-15", "2013-01-04","2013-01-07",1);
+			DateLoop("2013-01-01", "2013-04-01","2013-07-04",1);
 			System.out.println("订单辅表数据增量抽取完成");
 		} catch (Exception e) {
 			System.out.println("订单辅表抽取数据异常");
@@ -170,7 +170,8 @@ public class ZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 			sql.append("  TDELIVERTIME            ,");
 			sql.append("  TS                      ,");
 			sql.append("  VEDITREASON             ,");
-			sql.append("  VRECEIVEADDRESS           ");
+			sql.append("  VRECEIVEADDRESS         ,");
+			sql.append("  DR           ");
 			sql.append("  from so_saleorder_b sb");
 			sql.append("  where sb.csaleid in (select s.csaleid from so_sale s ");
 			sql.append("  where s.dbilldate >= '").append(dbilldate+"'");
@@ -287,7 +288,8 @@ public class ZLNCtoBQSenderBySoSaleorderB extends BaseDao implements Runnable {
 				insetSql.append("  TDELIVERTIME            ,");
 				insetSql.append("  TS                      ,");
 				insetSql.append("  VEDITREASON             ,");
-				insetSql.append("  VRECEIVEADDRESS        ) values (    ");
+				insetSql.append("  VRECEIVEADDRESS         ,");
+				insetSql.append("  DR        ) values (    ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

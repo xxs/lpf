@@ -194,7 +194,8 @@ public class ZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 			sql.append("  VRECEIVEADDRESS         ,");
 			sql.append("  VRETURNMODE             ,");
 			sql.append("  VSERIALCODE             ,");
-			sql.append("  VSOURCECODE                                   ");
+			sql.append("  VSOURCECODE             ,");
+			sql.append("  DR                       ");
 			sql.append("  from so_apply_b ayb");
 			sql.append("  where ayb.pk_apply in (select ay.pk_apply");
 			sql.append("  from so_apply ay");
@@ -336,7 +337,8 @@ public class ZLNCtoBQSenderBySoApplyB extends BaseDao implements Runnable {
 				insetSql.append("  VRECEIVEADDRESS         ,");
 				insetSql.append("  VRETURNMODE             ,");
 				insetSql.append("  VSERIALCODE             ,");
-				insetSql.append("  VSOURCECODE          ) values ( ");
+				insetSql.append("  VSOURCECODE             ,");
+				insetSql.append("  DR          ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

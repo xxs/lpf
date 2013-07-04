@@ -129,7 +129,8 @@ public class ZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 			sql.append("  VDEF7             ,");
 			sql.append("  VDEF8             ,");
 			sql.append("  VDEF9             ,");
-			sql.append("  VMEMO                                    ");
+			sql.append("  VMEMO             ,");
+			sql.append("  DR                 ");
 			sql.append("  from ic_wastagebill w");
 			sql.append("  where w.dbilldate >= '").append(dbilldate+"'");
 			sql.append("  and w.ts >= '").append(ts+"'");
@@ -204,7 +205,8 @@ public class ZLNCtoBQSenderByIcWastagebill extends BaseDao implements Runnable {
 				insetSql.append("  VDEF7             ,");
 				insetSql.append("  VDEF8             ,");
 				insetSql.append("  VDEF9             ,");
-				insetSql.append("  VMEMO     ) values (        ");
+				insetSql.append("  VMEMO        	 ,");
+				insetSql.append("  DR     ) values (        ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

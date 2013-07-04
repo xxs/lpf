@@ -125,7 +125,8 @@ public class ZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 			sql.append("  VDEF9,");
 			sql.append("  VNOTE,");
 			sql.append("  VRECEIPTCODE,");
-			sql.append("  VRECEIVEADDRESS");
+			sql.append("  VRECEIVEADDRESS,");
+			sql.append("  DR");
 			sql.append("	from so_preorder p");
 			sql.append("	where p.dbilldate >= '").append(dbilldate+"'");
 			sql.append("	and p.ts >= '").append(ts+"'");
@@ -190,7 +191,8 @@ public class ZLNCtoBQSenderBySoPreorder extends BaseDao implements Runnable {
 				insetSql.append("  VDEF9,");
 				insetSql.append("  VNOTE,");
 				insetSql.append("  VRECEIPTCODE,");
-				insetSql.append("  VRECEIVEADDRESS ) values ( ");
+				insetSql.append("  VRECEIVEADDRESS,");
+				insetSql.append("  DR ) values ( ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){

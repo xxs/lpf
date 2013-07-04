@@ -192,7 +192,8 @@ public class ZLNCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable 
 			sql.append("  VFREE5               ,");
 			sql.append("  VMEMO                ,");
 			sql.append("  VSOURCEBILLCODE      ,");
-			sql.append("  VSOURCEROWNO                              ");
+			sql.append("  VSOURCEROWNO         ,");
+			sql.append("  DR                    ");
 			sql.append("  from ic_wastagebill_b wb");
 			sql.append("  where wb.cwastagebillid in (select w.cwastagebillid");
 			sql.append("      from ic_wastagebill w");
@@ -332,7 +333,8 @@ public class ZLNCtoBQSenderByIcWastagebillB extends BaseDao implements Runnable 
 				insetSql.append("  VFREE5               ,");
 				insetSql.append("  VMEMO                ,");
 				insetSql.append("  VSOURCEBILLCODE      ,");
-				insetSql.append("  VSOURCEROWNO      ) values (        ");
+				insetSql.append("  VSOURCEROWNO         ,");
+				insetSql.append("  DR      ) values (        ");
 					for (int i = 1; i <= resultcount; i++) {
 						
 						if(rsmd.getColumnType(i)==1 ||rsmd.getColumnType(i)==12){
