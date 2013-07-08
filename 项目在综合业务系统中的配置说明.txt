@@ -1,0 +1,121 @@
+如果不明白之处，请联系我。电话：18639029539   QQ：704442497
+
+1.综合业务系统tomcat3部署说明：	
+    <!-- newsynear3 表示移动商务部署程序 -->
+    <!-- newsynear6 表示BQ数据抽取部署程序 -->
+    <!-- lpfnewsynear 表示测试部署程序 自己新功能测试使用 -->
+    <!--<Context  path="" docBase="e:\newsynear3\WebRoot" reloadable="true"/>-->
+    <Context  path="" docBase="e:\newsynear6\WebRoot" reloadable="true"/>
+    <!--<Context  path="" docBase="E:\lpfnewsynear\WebRoot" reloadable="true"/>-->
+	
+2.newsynear6 项目部署说明   此配置在项目web.xml中配置		
+	<!-- BQ抽取增量数据servlet配置,同ZLBQ的情况,但是逻辑稍微有些不同,具体逻辑见源代码
+	 <servlet>
+   		<servlet-name>nCtoBQServlet</servlet-name>
+    		<servlet-class>com.tend.servlet.NCtoBQServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+  	</servlet>
+	-->
+
+	<!-- ZLBQ抽取增量数据servlet配置   适合中断后需要跨时间段来进行数据抽取的情况
+	 <servlet>
+   		<servlet-name>ZLNCtoBQServlet</servlet-name>
+    		<servlet-class>com.tend.servlet.ZLNCtoBQServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+  	</servlet>
+	-->
+
+	<!-- 每天抽取增量数据servlet配置 -->
+	 <servlet>
+   		<servlet-name>DayZLNCtoBQServlet</servlet-name>
+    		<servlet-class>com.tend.servlet.DayZLNCtoBQServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+  	</servlet>	
+3.newsynear3 项目部署说明   此配置在项目web.xml中配置
+	<!-- 创建订单servlet配置 -->
+	 <servlet>
+		<servlet-name>AutoWriteOrderServlet</servlet-name>
+		<servlet-class>com.tend.servlet.AutoWriteOrderServlet</servlet-class>
+	 </servlet>
+	 <!-- 修改杰亦特验证用户密码servlet配置 -->
+	 <servlet>
+		<servlet-name>UpdatePwdServlet</servlet-name>
+		<servlet-class>com.tend.servlet.UpdatePwdServlet</servlet-class>
+	 </servlet>
+	 <!-- 生成订单的servlet配置 -->
+	 <servlet>
+		<servlet-name>MBizOrderToNcServlet</servlet-name>
+		<servlet-class>com.tend.servlet.MBizOrderToNcServlet</servlet-class>
+	 </servlet>
+	   <!-- 移动商务自动更新数据servlet配置 -->
+	  <servlet>
+		<servlet-name>autoRequestHttpServlet</servlet-name>
+		<servlet-class>com.tend.servlet.AutoRequestHttpServlet</servlet-class>
+		<!-- 思念用户名 -->
+		<init-param>
+		  <param-name>username</param-name>
+		  <param-value>SNData</param-value>
+		</init-param>
+		<!-- 思念code -->
+		<init-param>
+		  <param-name>pwd</param-name>
+		  <param-value>E10ADC3949BA59ABBE56E057F20F883E</param-value>
+		</init-param>
+		<!-- 产品、用户、终端同步的时间频率 -->
+		<init-param>
+		  <param-name>time</param-name>
+		  <param-value>1000</param-value>
+		</init-param>
+		<!-- KPI历史销售同步的时间频率 -->
+		<init-param>
+		  <param-name>kpitime</param-name>
+		  <param-value>86400000</param-value>
+		</init-param>
+		<!-- KPI历史销售同步的时间范围。eg：当前月份往前推monthnum个月 -->
+		<init-param>
+		  <param-name>monthnum</param-name>
+		  <param-value>2</param-value>
+		</init-param>
+		<!-- 杰亦特服务器IP+端口/ -->
+		<init-param>
+		  <param-name>loadurl</param-name>
+		  <param-value>http://100.100.1.96:8889/</param-value>
+		</init-param>
+		<!-- 思念生成订单的请求URL -->
+		<init-param>
+		  <param-name>requesturl</param-name>
+		  <param-value>http://100.100.1.74:83/makeorder.jy</param-value>
+		</init-param>
+		<!-- 思念生成订单的时间频率 -->
+		<init-param>
+		  <param-name>requesttime</param-name>
+		  <param-value>1000000</param-value>
+		</init-param>
+		<!-- 生成NC预订单的数据交互路径 -->
+		<init-param>
+			<param-name>ncserver</param-name>
+			<param-value>http://100.100.1.66:9080/service/XChangeServlet?account=0001</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	  </servlet>
+	<!-- 移动商务订单配置-->
+	<servlet-mapping>
+	    <servlet-name>AutoWriteOrderServlet</servlet-name>
+		<url-pattern>/AutoWriteOrderServlet</url-pattern>
+	</servlet-mapping>
+	<!-- 移动商务更新密码配置 -->
+	<servlet-mapping>
+	    <servlet-name>UpdatePwdServlet</servlet-name>
+		<url-pattern>/UpdatePwdServlet</url-pattern>
+	</servlet-mapping>
+	<!-- 移动商务更新密码配置 -->
+	<servlet-mapping>
+	    <servlet-name>MBizOrderToNcServlet</servlet-name>
+		<url-pattern>*.jy</url-pattern>		
+	</servlet-mapping>
+	
+	<!-- 移动商务配置 -->
+	<servlet-mapping>
+	    <servlet-name>autoRequestHttpServlet</servlet-name>
+		<url-pattern>/autoRequestHttpServlet</url-pattern>
+	</servlet-mapping>

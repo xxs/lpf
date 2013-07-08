@@ -23,7 +23,7 @@ public class ZLNCtoBQSenderBySoSale extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2013-01-01", "2013-04-01","2013-07-04",2);
+			DateLoop(this.getBilldate(),this.getBegindate(), this.getEnddate(),this.getZday());
 			System.out.println("订单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("订单主表抽取增量数据异常");

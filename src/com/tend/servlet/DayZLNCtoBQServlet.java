@@ -130,6 +130,8 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 		Twastagebill = new Thread(wastagebill);
 		TwastagebillB = new Thread(wastagebillB);
 		
+		
+		
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 1); // 控制时      12
         calendar.set(Calendar.MINUTE, 0);       // 控制分   0
@@ -139,6 +141,44 @@ public class DayZLNCtoBQServlet extends HttpServlet {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
             	try {
+            		//读取参数配置文件
+            		CommonParam commonParam = new CommonParam();
+            		Integer days = Integer.parseInt(commonParam.getString("days"));
+            		Integer beforedays = Integer.parseInt(commonParam.getString("beforedays"));
+            		String arap_djzb = commonParam.getString("dayzlnc_arap_djzb");
+            		String arap_djfb = commonParam.getString("dayzlnc_arap_djfb");
+            		String ic_general_h = commonParam.getString("dayzlnc_ic_general_h");
+            		String ic_general_b = commonParam.getString("dayzlnc_ic_general_b");
+            		String ic_wastagebill_h = commonParam.getString("dayzlnc_ic_wastagebill_h");
+            		String ic_wastagebill_b = commonParam.getString("dayzlnc_ic_wastagebill_b");
+            		String so_apply = commonParam.getString("dayzlnc_so_apply");
+            		String so_apply_b = commonParam.getString("dayzlnc_so_apply_b");
+            		String so_preorder_h = commonParam.getString("dayzlnc_so_preorder_h");
+            		String so_preorder_b = commonParam.getString("dayzlnc_so_preorder_b");
+            		String so_sale = commonParam.getString("dayzlnc_so_sale");
+            		String so_saleorder_b = commonParam.getString("dayzlnc_so_saleorder_b");
+            		String so_saleinvoice = commonParam.getString("dayzlnc_so_saleinvoice");
+            		String so_saleinvoice_b = commonParam.getString("dayzlnc_so_saleinvoice_b");
+            		
+            		System.out.println("-------------加载配置参数  begin-------------------");
+            		System.out.println("days参数值 ："+days);
+            		System.out.println("beforedays参数值 ："+beforedays);
+            		System.out.println("arap_djzb ："+arap_djzb);
+            		System.out.println("arap_djfb ："+arap_djfb);
+            		System.out.println("ic_general_h ："+ic_general_h);
+            		System.out.println("ic_general_b ："+ic_general_b);
+            		System.out.println("ic_wastagebill_h ："+ic_wastagebill_h);
+            		System.out.println("ic_wastagebill_b ："+ic_wastagebill_b);
+            		System.out.println("so_apply ："+so_apply);
+            		System.out.println("so_apply_b ："+so_apply_b);
+            		System.out.println("so_preorder_h ："+so_preorder_h);
+            		System.out.println("so_preorder_b ："+so_preorder_b);
+            		System.out.println("so_sale ："+so_sale);
+            		System.out.println("so_saleorder_b ："+so_saleorder_b);
+            		System.out.println("so_saleinvoice ："+so_saleinvoice);
+            		System.out.println("so_saleinvoice_b ："+so_saleinvoice_b);
+            		System.out.println("-------------加载配置参数  end-------------------");
+            		
 					System.out.println("抽取增量NC数据到BQ数据仓库启动线程！"); 
 					System.out.println(TarapDjzb.isAlive());
 					System.out.println(TarapDjfb.isAlive());
@@ -154,60 +194,59 @@ public class DayZLNCtoBQServlet extends HttpServlet {
 					System.out.println(TicGeneralH.isAlive());
 					System.out.println(Twastagebill.isAlive());
 					System.out.println(TwastagebillB.isAlive());
-					
-					if(!TarapDjzb.isAlive()){
+					if(!TarapDjzb.isAlive()&&"true".equals(arap_djzb)){
 						TarapDjzb = new Thread(arapDjzb);
 						TarapDjzb.start();
 					}
-					if(!TarapDjfb.isAlive()){
+					if(!TarapDjfb.isAlive()&&"true".equals(arap_djfb)){
 						TarapDjfb = new Thread(arapDjfb);
 						TarapDjfb.start();
 					}
-					if(!TsoSale.isAlive()){
+					if(!TsoSale.isAlive()&&"true".equals(so_sale)){
 						TsoSale = new Thread(soSale);
 						TsoSale.start();
 					}
-					if (!TsoSaleorderB.isAlive()){
+					if (!TsoSaleorderB.isAlive()&&"true".equals(so_saleorder_b)){
 						TsoSaleorderB = new Thread(soSaleorderB);
 						TsoSaleorderB.start();
 					}
-					if (!TsoApply.isAlive()){
+					if (!TsoApply.isAlive()&&"true".equals(so_apply)){
 						TsoApply = new Thread(soApply);
 						TsoApply.start();
 					}
-					if (!TsoApplyB.isAlive()){
+					if (!TsoApplyB.isAlive()&&"true".equals(so_apply_b)){
 						TsoApplyB = new Thread(soApplyB);
 						TsoApplyB.start();
 					}
-					if (!TsoPreorder.isAlive()){
+					if (!TsoPreorder.isAlive()&&"true".equals(so_preorder_h)){
 						TsoPreorder = new Thread(soPreorder);
 						TsoPreorder.start();
 					}
-					if (!TsoPreorderB.isAlive()){
+					if (!TsoPreorderB.isAlive()&&"true".equals(so_preorder_b)){
 						TsoPreorderB = new Thread(soPreorderB);
 						TsoPreorderB.start();
 					}
-					if (!TsoSaleinvoice.isAlive()){
+					if (!TsoSaleinvoice.isAlive()&&"true".equals(so_saleinvoice)){
 						TsoSaleinvoice = new Thread(soSaleinvoice);
 						TsoSaleinvoice.start();
 					}
-					if (!TsoSaleinvoiceB.isAlive()){
+					if (!TsoSaleinvoiceB.isAlive()&&"true".equals(so_saleinvoice_b)){
 						TsoSaleinvoiceB = new Thread(soSaleinvoiceB);
 						TsoSaleinvoiceB.start();
 					}
-					if (!TicGeneralB.isAlive()){ 
+					if (!TicGeneralB.isAlive()&&"true".equals(ic_general_b)){ 
 						TicGeneralB = new Thread(icGeneralB);
 						TicGeneralB.start();
 					}
-					if (!TicGeneralH.isAlive()){
+					if (!TicGeneralH.isAlive()&&"true".equals(ic_general_h)){
 						TicGeneralH = new Thread(icGeneralH);
 						TicGeneralH.start();
 					}
-					if (!Twastagebill.isAlive()){
+					if (!Twastagebill.isAlive()&&"true".equals(ic_wastagebill_h)){
 						Twastagebill = new Thread(wastagebill);
 						Twastagebill.start();
 					}
-					if (!TwastagebillB.isAlive()){
+					if (!TwastagebillB.isAlive()&&"true".equals(ic_wastagebill_b)){
 						TwastagebillB = new Thread(wastagebillB);
 						TwastagebillB.start();
 					}

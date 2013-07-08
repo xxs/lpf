@@ -1,0 +1,59 @@
+参数说明
+## ZLNCtoBQ config
+billdate=2013-01-01     //参考的单据日期
+begindate=2013-06-01	//ts的开始时间
+enddate=2013-07-08		//ts的结束时间
+zday=2					//主表抽取的时间跨度 单位：天
+fday=1					//辅表表抽取的时间跨度 单位：天
+zlnc_arap_djzb=true				//单据主表         为true表示抽取；为false表示不抽取
+zlnc_arap_djfb=true				//单据辅表         为true表示抽取；为false表示不抽取
+zlnc_ic_general_h=false			//出入库单主表         为true表示抽取；为false表示不抽取
+zlnc_ic_general_b=false			//出入库单辅表         为true表示抽取；为false表示不抽取
+zlnc_ic_wastagebill_h=false		//途损单主表         为true表示抽取；为false表示不抽取
+zlnc_ic_wastagebill_b=false		//途损单辅表         为true表示抽取；为false表示不抽取
+zlnc_so_apply=false				//退货申请单主表         为true表示抽取；为false表示不抽取
+zlnc_so_apply_b=false			//退货申请单辅表         为true表示抽取；为false表示不抽取
+zlnc_so_preorder_h=false		//预订单主表         为true表示抽取；为false表示不抽取
+zlnc_so_preorder_b=false		//预订单辅表         为true表示抽取；为false表示不抽取
+zlnc_so_sale=false				//订单主表         为true表示抽取；为false表示不抽取
+zlnc_so_saleorder_b=false		//订单辅表         为true表示抽取；为false表示不抽取
+zlnc_so_saleinvoice=false		//发票主表         为true表示抽取；为false表示不抽取
+zlnc_so_saleinvoice_b=false		//发票辅表         为true表示抽取；为false表示不抽取
+
+## DayZLNCtoBQ config
+days=180					//参考的单据日期的范围     此配置表示当前日期的前180天       
+beforedays=1				//抽取昨天有变化的单据    此配置表示当前日期的前1天       
+dayzlnc_arap_djzb=true      //说明同上
+dayzlnc_arap_djfb=true
+dayzlnc_ic_general_h=true
+dayzlnc_ic_general_b=true
+dayzlnc_ic_wastagebill_h=true
+dayzlnc_ic_wastagebill_b=true
+dayzlnc_so_apply=true
+dayzlnc_so_apply_b=true
+dayzlnc_so_preorder_h=true
+dayzlnc_so_preorder_b=true
+dayzlnc_so_sale=true
+dayzlnc_so_saleorder_b=true
+dayzlnc_so_saleinvoice=true
+dayzlnc_so_saleinvoice_b=true
+
+## NCtoBQ config
+nctobq_begindate=2013-06-01		//ts的结束时间
+nctobq_enddate=2013-07-08		//ts的结束时间
+nctobq_zday=2					//主表抽取的时间跨度 单位：天
+nctobq_fday=2					//辅表表抽取的时间跨度 单位：天
+nctobq_arap_djzb=true			//说明同上
+nctobq_arap_djfb=true
+nctobq_ic_general_h=true
+nctobq_ic_general_b=true
+nctobq_ic_wastagebill_h=true
+nctobq_ic_wastagebill_b=true
+nctobq_so_apply=true
+nctobq_so_apply_b=true
+nctobq_so_preorder_h=true
+nctobq_so_preorder_b=true
+nctobq_so_sale=true
+nctobq_so_saleorder_b=true
+nctobq_so_saleinvoice=true
+nctobq_so_saleinvoice_b=true

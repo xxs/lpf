@@ -15,7 +15,7 @@ public class NCtoBQSenderByToBill extends BaseDao implements Runnable {
 
 	public void run() {
 		try {
-			DateLoop("2010-07-01", "2010-08-01", 3);
+			DateLoop(this.getNctobq_begindate(), this.getEnddate(),this.getNctobq_zday());
 			System.out.println("内部交易主表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("内部交易主表抽取数据异常");

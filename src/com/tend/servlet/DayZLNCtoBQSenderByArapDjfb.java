@@ -273,7 +273,7 @@ public class DayZLNCtoBQSenderByArapDjfb extends BaseDao implements Runnable {
 			sql.append("  and z.dwbm != '1024'");
 			sql.append("  and z.dwbm != '1032' )");
 			
-			//System.out.println("查询sql:"+sql);
+			System.out.println("查询sql:"+sql);
 			pstNC = conNC.prepareStatement(sql.toString());
 			restNC = pstNC.executeQuery();
 			ResultSetMetaData rsmd = restNC.getMetaData();

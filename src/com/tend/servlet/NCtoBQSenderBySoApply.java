@@ -23,7 +23,7 @@ public class NCtoBQSenderBySoApply extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2013-03-02", "2013-03-05",3);
+			DateLoop(this.getNctobq_begindate(), this.getEnddate(),this.getNctobq_zday());
 			System.out.println("退货申请单主表增量数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("退货申请单主表抽取数据异常");

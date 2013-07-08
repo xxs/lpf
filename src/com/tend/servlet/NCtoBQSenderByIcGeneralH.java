@@ -19,7 +19,7 @@ public class NCtoBQSenderByIcGeneralH extends BaseDao implements Runnable {
 	 */
 	public void run() {
 		try {
-			DateLoop("2013-03-02", "2013-03-05",3);
+			DateLoop(this.getNctobq_begindate(), this.getEnddate(),this.getNctobq_zday());
 			System.out.println("出入库单主表数据抽取完成");
 		} catch (Exception e) {
 			System.out.println("出入库单主表抽取数据异常");
